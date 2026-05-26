@@ -507,21 +507,21 @@
       background: var(--white);
       border-top: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-around;
-      padding: 0 16px;
+      padding: 0 4px;
       box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
       z-index: 100;
     }
     .nav-item {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      cursor: pointer; padding: 8px 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      cursor: pointer; padding: 6px 8px;
       transition: all 0.2s; border-radius: var(--radius-sm);
     }
     .nav-item:hover { background: var(--cream); }
-    .nav-item .nav-icon { font-size: 22px; color: var(--text-light); transition: color 0.2s; }
-    .nav-item .nav-label { font-size: 10px; font-weight: 600; color: var(--text-light); transition: color 0.2s; }
+    .nav-item .nav-icon { font-size: 20px; color: var(--text-light); transition: color 0.2s; }
+    .nav-item .nav-label { font-size: 9px; font-weight: 600; color: var(--text-light); transition: color 0.2s; }
     .nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--teal); }
     .nav-item.active .nav-icon { color: var(--teal); }
-    .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); margin-top: 2px; opacity: 0; transition: opacity 0.2s; }
+    .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--teal); margin-top: 1px; opacity: 0; transition: opacity 0.2s; }
     .nav-item.active .nav-dot { opacity: 1; }
 
     .nav-plus {
@@ -744,6 +744,256 @@
     }
 
     /* ─────────────────────────────────────────────
+       NEW SCREEN STYLES
+       Onboarding, Co-Pilot, Cohort, Channels
+    ───────────────────────────────────────────── */
+
+    /* Onboarding Wizard */
+    .onboarding-screen {
+      padding: 40px 24px;
+      min-height: 100vh;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .onboarding-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .onboarding-header h1 {
+      font-size: 28px; font-weight: 800; color: var(--teal);
+    }
+    .onboarding-header h1 span {
+      color: var(--orange);
+    }
+    .onboarding-header p {
+      font-size: 14px; color: var(--text-mid); margin-top: 8px; line-height: 1.5;
+    }
+    .onboarding-step {
+      display: none;
+      animation: fadeSlideIn 0.3s ease;
+    }
+    .onboarding-step.active {
+      display: block;
+    }
+    .onboarding-progress-bar {
+      height: 6px; background: var(--border); border-radius: 3px;
+      margin-bottom: 30px; position: relative;
+    }
+    .onboarding-progress-fill {
+      height: 100%; background: var(--orange); border-radius: 3px;
+      width: 33.3%; transition: width 0.3s ease;
+    }
+    .onboarding-btn-row {
+      display: flex; gap: 12px; margin-top: 32px;
+    }
+    .btn-secondary {
+      flex: 1; background: var(--bg); color: var(--text-mid);
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: var(--border); }
+    
+    /* Option Cards */
+    .option-cards {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .option-card {
+      background: var(--bg); border: 2px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px 18px;
+      cursor: pointer; transition: all 0.22s;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .option-card:hover { border-color: var(--orange-light); background: var(--cream); }
+    .option-card.selected { border-color: var(--orange); background: var(--cream); }
+    .option-card .opt-icon { font-size: 22px; }
+    .option-card h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .option-card p { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+    
+    /* Skills pill grid */
+    .skills-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      max-height: 250px; overflow-y: auto; padding: 4px;
+      scrollbar-width: thin;
+    }
+    .skill-pill {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 8px 16px; font-size: 12px; font-weight: 600;
+      color: var(--text-mid); cursor: pointer; transition: all 0.2s;
+    }
+    .skill-pill:hover { border-color: var(--orange); color: var(--orange-dark); }
+    .skill-pill.selected { background: var(--teal); border-color: var(--teal); color: white; }
+
+    /* AI Co-Pilot Workspace */
+    .copilot-tabs {
+      display: flex; background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 12px;
+    }
+    .copilot-tab {
+      flex: 1; padding: 16px 8px; text-align: center;
+      font-size: 12px; font-weight: 700; color: var(--text-light);
+      cursor: pointer; position: relative; transition: color 0.2s;
+    }
+    .copilot-tab.active { color: var(--teal); }
+    .copilot-tab.active::after {
+      content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+      height: 3px; background: var(--teal); border-radius: 3px 3px 0 0;
+    }
+    .copilot-panel { display: none; padding: 20px; }
+    .copilot-panel.active { display: block; }
+    
+    .copilot-output-card {
+      background: #1E1E2F; color: #D4D4D4;
+      border-radius: var(--radius-md); padding: 18px; margin-top: 20px;
+      font-family: 'Courier New', Courier, monospace; font-size: 12px;
+      line-height: 1.6; border: 1px solid #2D2D44;
+      position: relative; box-shadow: var(--shadow-md);
+    }
+    .copilot-output-card .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.08); color: white;
+      border: none; border-radius: 6px; padding: 6px 12px;
+      font-size: 10px; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background 0.2s;
+    }
+    .copilot-output-card .copy-btn:hover { background: rgba(255,255,255,0.15); }
+    .output-pre {
+      white-space: pre-wrap; max-height: 260px; overflow-y: auto;
+      margin-top: 10px; padding-right: 8px;
+    }
+    
+    /* Pricing Calculator slider details */
+    .calc-box {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 18px; border: 1.5px solid var(--border);
+    }
+    .calc-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .calc-row:last-child { margin-bottom: 0; }
+    .calc-label { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+    .calc-value { font-size: 18px; font-weight: 800; color: var(--teal); }
+    .calc-slider-wrap { margin: 8px 0 20px; }
+    
+    .calc-results {
+      margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .calc-res-card {
+      background: var(--cream); border-radius: var(--radius-md);
+      padding: 14px; border: 1.5px solid var(--cream-dark);
+      text-align: center;
+    }
+    .calc-res-card.wide-card { grid-column: 1 / -1; background: var(--teal-dark); color: white; }
+    .calc-res-card h4 { font-size: 10px; font-weight: 700; color: var(--orange-dark); text-transform: uppercase; }
+    .calc-res-card.wide-card h4 { color: var(--orange-light); }
+    .calc-res-card .res-val { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    
+    /* Async Cohorts Chat interface */
+    .chat-container {
+      display: flex; flex-direction: column; height: calc(100vh - var(--nav-h) - 100px);
+      padding: 16px 20px; gap: 14px; overflow-y: auto;
+    }
+    .chat-system-prompt {
+      background: #FFF3E8; border: 1.5px solid #FFE8CC; border-left: 4px solid var(--orange);
+      border-radius: var(--radius-md); padding: 14px 16px;
+      font-size: 12px; color: var(--text-dark); line-height: 1.6;
+    }
+    .chat-system-prompt strong { color: var(--orange-dark); }
+    
+    .chat-bubble {
+      display: flex; gap: 10px; max-width: 85%;
+    }
+    .chat-bubble.left { align-self: flex-start; }
+    .chat-bubble.right { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--teal); color: white; display: flex;
+      align-items: center; justify-content: center; font-weight: 700;
+      font-size: 12px; flex-shrink: 0;
+    }
+    .chat-avatar.a1 { background: #E15B64; }
+    .chat-avatar.a2 { background: #F47E60; }
+    .chat-avatar.a3 { background: #F8B26A; }
+    .chat-avatar.me { background: var(--teal); }
+    
+    .chat-bubble-body {
+      background: var(--white); border-radius: 0 16px 16px 16px;
+      padding: 12px 14px; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .chat-bubble.right .chat-bubble-body {
+      background: var(--teal); color: white; border-radius: 16px 0 16px 16px;
+      border-color: var(--teal);
+    }
+    .chat-user-name { font-size: 10px; font-weight: 700; color: var(--text-light); margin-bottom: 2px; }
+    .chat-bubble.right .chat-user-name { color: rgba(255,255,255,0.7); text-align: right; }
+    .chat-text { font-size: 12.5px; line-height: 1.5; }
+    .chat-time { font-size: 9px; color: var(--text-light); margin-top: 4px; text-align: right; }
+    .chat-bubble.right .chat-time { color: rgba(255,255,255,0.6); }
+
+    .chat-input-row {
+      display: flex; gap: 10px; padding: 12px 20px;
+      background: var(--white); border-top: 1px solid var(--border);
+    }
+    .chat-input-row input {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 20px;
+      padding: 10px 16px; font-size: 13.5px; outline: none;
+      background: var(--bg); transition: border-color 0.2s;
+    }
+    .chat-input-row input:focus { border-color: var(--orange); }
+    .chat-send-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--orange); border: none; color: white;
+      font-size: 16px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .chat-send-btn:hover { background: var(--orange-dark); transform: scale(1.05); }
+
+    /* Specs & Tools Hub */
+    .menu-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+      padding: 20px;
+    }
+    .menu-card {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: var(--radius-md); padding: 20px 16px;
+      text-align: center; cursor: pointer; transition: all 0.22s;
+      box-shadow: var(--shadow-sm);
+    }
+    .menu-card:hover { border-color: var(--orange); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .menu-card .m-icon { font-size: 32px; margin-bottom: 10px; }
+    .menu-card h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .menu-card p { font-size: 11px; color: var(--text-light); margin-top: 4px; line-height: 1.4; }
+
+    /* Channel Targeter panel */
+    .channel-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+    .channel-card {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 18px; border: 1.5px solid var(--border);
+      display: flex; gap: 14px; cursor: pointer; transition: all 0.2s;
+    }
+    .channel-card:hover { border-color: var(--orange); box-shadow: var(--shadow-sm); }
+    .channel-badge {
+      font-size: 10px; font-weight: 700; border-radius: 20px; padding: 2px 8px;
+      display: inline-block; margin-bottom: 6px;
+    }
+    .channel-badge.t1 { background: #E3F2FD; color: #1565C0; }
+    .channel-badge.t2 { background: #FFF8E1; color: var(--orange-dark); }
+    .channel-badge.t3 { background: #FFEBEE; color: var(--danger); }
+    .channel-card-body h3 { font-size: 15px; font-weight: 700; color: var(--text-dark); }
+    .channel-card-body p { font-size: 12px; color: var(--text-mid); margin-top: 4px; line-height: 1.5; }
+    .channel-wrap-guide {
+      margin-top: 10px; padding: 8px 10px; border-radius: var(--radius-sm);
+      background: var(--cream); font-size: 11px; color: var(--text-mid);
+      border-left: 3px solid var(--orange); line-height: 1.4;
+    }
+
+
+    /* ─────────────────────────────────────────────
        SCREENSHOT FAB
     ───────────────────────────────────────────── */
     .screenshot-fab {
@@ -768,9 +1018,107 @@
 <div class="app-shell">
 
   <!-- ══════════════════════════════════════════
+       SCREEN 0: ONBOARDING WIZARD (Intake)
+  ══════════════════════════════════════════ -->
+  <div class="screen active" id="screen-onboarding" style="padding: 0; background: var(--white);">
+    <div class="onboarding-screen">
+      
+      <!-- Onboarding Header -->
+      <div class="onboarding-header">
+        <div style="font-size: 38px; margin-bottom: 8px;">🌱</div>
+        <h1>Second <span>Salary</span></h1>
+        <p>From "burned and stalled" to your first ₹10,000 earned in 90 days. Let's build your protective infrastructure.</p>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="onboarding-progress-bar">
+        <div class="onboarding-progress-fill" id="onboard-progress"></div>
+      </div>
+
+      <!-- STEP 1: Specialization -->
+      <div class="onboarding-step active" id="onboard-step-1">
+        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px;">What is your primary skill or consulting area?</h2>
+        <p style="font-size: 12px; color: var(--text-mid); margin-bottom: 16px; line-height: 1.4;">Select your domain. We will load a matching 40-skill taxonomy for you.</p>
+        
+        <div class="skills-grid" id="onboard-skills-container">
+          <!-- Dynamically populated skills pills -->
+        </div>
+      </div>
+
+      <!-- STEP 2: Previous Failure Mode -->
+      <div class="onboarding-step" id="onboard-step-2">
+        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px;">What happened in your last side income attempt?</h2>
+        <p style="font-size: 12px; color: var(--text-mid); margin-bottom: 16px; line-height: 1.4;">We replace the exact infrastructure that was missing last time. Be brutally honest.</p>
+        
+        <div class="option-cards">
+          <div class="option-card" onclick="selectFailure(this, 'ghosted')">
+            <span class="opt-icon">🚨</span>
+            <div>
+              <h3>Client went quiet / ghosted me</h3>
+              <p>Work was delivered, but outstanding invoices were never paid.</p>
+            </div>
+          </div>
+          <div class="option-card" onclick="selectFailure(this, 'scope')">
+            <span class="opt-icon">📈</span>
+            <div>
+              <h3>Unlimited scope creep</h3>
+              <p>The client kept demanding "small additions" without paying more.</p>
+            </div>
+          </div>
+          <div class="option-card" onclick="selectFailure(this, 'underpriced')">
+            <span class="opt-icon">💸</span>
+            <div>
+              <h3>Massive underpricing</h3>
+              <p>I quoted too low, worked 40 hours for peanuts, and burned out.</p>
+            </div>
+          </div>
+          <div class="option-card" onclick="selectFailure(this, 'paralysis')">
+            <span class="opt-icon">🌀</span>
+            <div>
+              <h3>Analysis paralysis / Stalled</h3>
+              <p>I couldn't figure out packaging, pricing, or DMs, and never started.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Goals & Availability -->
+      <div class="onboarding-step" id="onboard-step-3">
+        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px;">Your commitment & earning targets</h2>
+        <p style="font-size: 12px; color: var(--text-mid); margin-bottom: 20px; line-height: 1.4;">Let's customize your adaptive Day-9 sprint and recommended pricing rates.</p>
+        
+        <div class="calc-box">
+          <div class="calc-row">
+            <span class="calc-label">Hours available per week</span>
+            <span class="calc-value" id="onboard-hours-val">6 hrs</span>
+          </div>
+          <div class="calc-slider-wrap">
+            <input type="range" class="conf-slider" id="onboard-hours-slider" min="4" max="20" value="6" oninput="document.getElementById('onboard-hours-val').textContent = this.value + ' hrs'" />
+          </div>
+
+          <div class="calc-row" style="margin-top: 24px;">
+            <span class="calc-label">Target side income (90 days)</span>
+            <span class="calc-value" id="onboard-target-val">₹50,000</span>
+          </div>
+          <div class="calc-slider-wrap">
+            <input type="range" class="conf-slider" id="onboard-target-slider" min="10000" max="150000" step="5000" value="50000" oninput="document.getElementById('onboard-target-val').textContent = '₹' + parseInt(this.value).toLocaleString('en-IN')" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Onboarding Navigation Buttons -->
+      <div class="onboarding-btn-row">
+        <button class="btn-secondary" id="onboard-back-btn" onclick="prevOnboardStep()" style="display: none;">Back</button>
+        <button class="modal-btn" id="onboard-next-btn" onclick="nextOnboardStep()" style="margin-top: 0; flex: 2;">Continue</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
        SCREEN 1: HOME / DASHBOARD
   ══════════════════════════════════════════ -->
-  <div class="screen active" id="screen-home">
+  <div class="screen" id="screen-home">
 
     <div class="top-header">
       <p class="greeting">Good evening, Priya 👋</p>
@@ -1576,10 +1924,292 @@
   </div>
 
   <!-- ══════════════════════════════════════════
+       SCREEN 2.5: AI CO-PILOT WORKSPACE
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-copilot">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>AI Co-Pilot Workspace</h1>
+      <p>Sleek, protective automation. Turn client requests into verified scopes.</p>
+    </div>
+    
+    <div class="copilot-tabs">
+      <div class="copilot-tab active" id="tab-proposal" onclick="switchCopilotTab('proposal')">Proposal Builder</div>
+      <div class="copilot-tab" id="tab-contract" onclick="switchCopilotTab('contract')">Contract Builder</div>
+      <div class="copilot-tab" id="tab-calc" onclick="switchCopilotTab('calc')">Pricing Calculator</div>
+    </div>
+
+    <!-- Panel 1: Proposal Builder -->
+    <div class="copilot-panel active" id="panel-proposal">
+      <div class="form-field">
+        <label>Client Industry & Brief Description</label>
+        <input type="text" id="prop-client" placeholder="e.g. Series-A fintech startup, payment onboarding redesign" />
+      </div>
+      <div class="form-field">
+        <label>Scope of Deliverables</label>
+        <input type="text" id="prop-scope" placeholder="e.g. 5 mobile screens, Figma files, interactive prototype" />
+      </div>
+      <div class="form-field">
+        <label>Select Tone Option</label>
+        <select id="prop-tone">
+          <option value="collaborative">Collaborative & Peer-to-Peer (Highly Recommended)</option>
+          <option value="direct">Direct & Value-Focused</option>
+          <option value="expert">Premium Expert Advice (High Price Anchor)</option>
+        </select>
+      </div>
+      <button class="modal-btn" onclick="generateProposal()">🤖 Generate Draft Proposal</button>
+      
+      <div class="copilot-output-card" id="proposal-output-wrap" style="display:none">
+        <button class="copy-btn" onclick="copyCopilotText('proposal-text')">Copy Draft</button>
+        <h4 style="color:var(--orange);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Generated Proposal Pitch</h4>
+        <div class="output-pre" id="proposal-text"></div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Contract Builder -->
+    <div class="copilot-panel" id="panel-contract">
+      <div class="form-field">
+        <label>Proposed Project Fee (₹)</label>
+        <input type="number" id="contract-fee" placeholder="e.g. 50000" />
+      </div>
+      <div class="form-field">
+        <label>Number of revision iterations included</label>
+        <select id="contract-revisions">
+          <option value="1">1 Revision Cycle (Protective Standard)</option>
+          <option value="2" selected>2 Revision Cycles (Standard)</option>
+          <option value="3">3 Revision Cycles (High Service)</option>
+        </select>
+      </div>
+      <button class="modal-btn" style="background:var(--teal)" onclick="generateContract()">📝 Generate Protective Clauses</button>
+      
+      <div class="copilot-output-card" id="contract-output-wrap" style="display:none">
+        <button class="copy-btn" onclick="copyCopilotText('contract-text')">Copy Clauses</button>
+        <h4 style="color:var(--orange);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Protective Scope & Payment Clauses</h4>
+        <div class="output-pre" id="contract-text"></div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Pricing Calculator -->
+    <div class="copilot-panel" id="panel-calc">
+      <div class="calc-box">
+        <div class="calc-row">
+          <span class="calc-label">Target Monthly Side Income</span>
+          <span class="calc-value" id="calc-income-val">₹50,000</span>
+        </div>
+        <div class="calc-slider-wrap">
+          <input type="range" class="conf-slider" id="calc-income" min="10000" max="150000" step="5000" value="50000" oninput="updatePricingCalc()" />
+        </div>
+
+        <div class="calc-row" style="margin-top:20px">
+          <span class="calc-label">Weekly Working Hours</span>
+          <span class="calc-value" id="calc-hours-val">6 hrs</span>
+        </div>
+        <div class="calc-slider-wrap">
+          <input type="range" class="conf-slider" id="calc-hours" min="4" max="24" value="6" oninput="updatePricingCalc()" />
+        </div>
+      </div>
+
+      <div class="calc-results">
+        <div class="calc-res-card">
+          <h4>Hourly Rate Target</h4>
+          <div class="res-val" id="calc-res-hourly" style="color:var(--teal)">₹1,920</div>
+        </div>
+        <div class="calc-res-card">
+          <h4>Min Retainer / Mo</h4>
+          <div class="res-val" id="calc-res-retainer" style="color:var(--orange)">₹50,000</div>
+        </div>
+        <div class="calc-res-card wide-card">
+          <h4>Recommended Project Pricing Anchor</h4>
+          <div class="res-val" id="calc-res-project">₹75,000</div>
+          <p style="font-size:10px;opacity:0.8;margin-top:6px">Calculated with a 1.5x protective value buffer for scope management.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2.7: ASYNC PEER COHORT
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-cohort">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>Cohort #142 (Async)</h1>
+      <p>Your 5-person accountability group. Auto-assigned, peer verified.</p>
+    </div>
+
+    <!-- Chat Prompt Message -->
+    <div style="padding:16px 20px 0">
+      <div class="chat-system-prompt">
+        📢 <strong>Structured Cohort Challenge:</strong><br>
+        <span id="cohort-challenge-text">Day 9 Sprint Target: Send your first proposal pitch draft today. Share your progress or post questions if you feel stuck!</span>
+      </div>
+    </div>
+
+    <!-- Chat Bubbles Area -->
+    <div class="chat-container" id="chat-messages-container">
+      <div class="chat-bubble left">
+        <div class="chat-avatar a1">AR</div>
+        <div class="chat-bubble-body">
+          <div class="chat-user-name">Ananya R.</div>
+          <p class="chat-text">Just finished customizing my proposal copy using the Day 9 script! The protective scope clause in the contract builder is key.</p>
+          <div class="chat-time">9:14 AM</div>
+        </div>
+      </div>
+
+      <div class="chat-bubble left">
+        <div class="chat-avatar a2">KM</div>
+        <div class="chat-bubble-body">
+          <div class="chat-user-name">Karthik M.</div>
+          <p class="chat-text">My client tried to slip in a last-minute dashboard screen. Literally copy-pasted the Co-Pilot revisions limit script. They agreed to pay an extra ₹8,000 without any argument!</p>
+          <div class="chat-time">10:02 AM</div>
+        </div>
+      </div>
+
+      <div class="chat-bubble left">
+        <div class="chat-avatar a3">ST</div>
+        <div class="chat-bubble-body">
+          <div class="chat-user-name">Sneha T.</div>
+          <p class="chat-text">I was totally blocked on rate quoting. Checked the pricing calculator, anchored hourly target at ₹2,500. Just quoted ₹45,000 for a 3-week project. Wish me luck!</p>
+          <div class="chat-time">10:15 AM</div>
+        </div>
+      </div>
+      
+      <!-- User messages get dynamically appended here -->
+    </div>
+
+    <!-- Chat Input Box -->
+    <div class="chat-input-row">
+      <input type="text" id="chat-input-field" placeholder="Type a message to your cohort..." onkeypress="handleChatKeyPress(event)" />
+      <button class="chat-send-btn" onclick="sendCohortMessage()">➔</button>
+    </div>
+    
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2.8: SPECS & TOOLS HUB
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-specs">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>Specs & Tools Hub</h1>
+      <p>Explore MVP product features, success metrics, risk sheets, and channel targets.</p>
+    </div>
+
+    <div class="menu-grid">
+      <div class="menu-card" onclick="navigate('caps')">
+        <div class="m-icon">📋</div>
+        <h3>8 Capabilities</h3>
+        <p>Full functional breakdown of MVP features.</p>
+      </div>
+
+      <div class="menu-card" onclick="navigate('metrics')">
+        <div class="m-icon">📊</div>
+        <h3>Success Metrics</h3>
+        <p>Success criteria, primary & anti-metrics.</p>
+      </div>
+
+      <div class="menu-card" onclick="navigate('journey')">
+        <div class="m-icon">🗺️</div>
+        <h3>Risks & Mitigations</h3>
+        <p>Key architectural bets and timelines.</p>
+      </div>
+
+      <div class="menu-card" onclick="navigate('channels')">
+        <div class="m-icon">🎯</div>
+        <h3>Channel Targeter</h3>
+        <p>Strategic platforms & safety wrap guidelines.</p>
+      </div>
+    </div>
+    
+    <!-- Reset Profile Simulation Card -->
+    <div style="padding:0 20px; margin-top:10px">
+      <div class="day-card wide" onclick="resetProfileSimulation()" style="background:#FFF3E8; border:1.5px dashed var(--orange); cursor:pointer">
+        <div>
+          <div class="day-num" style="color:var(--orange-dark)">Developer Tool</div>
+          <h3 style="color:var(--text-dark)">Reset Profile & Restart Intake</h3>
+          <p style="color:var(--text-mid)">Re-run onboarding wizard simulation.</p>
+        </div>
+        <div class="more-badge" style="background:var(--orange)">Reset</div>
+      </div>
+    </div>
+    
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2.9: CHANNEL TARGETER
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-channels">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('specs')">← Back</div>
+      <h1>Channel Targeter</h1>
+      <p>Platforms matched to your skill profile with built-in protective wraps.</p>
+    </div>
+
+    <div class="section-label"><h2>Platform Matches</h2><span></span></div>
+    
+    <div class="channel-list">
+      
+      <div class="channel-card">
+        <div style="font-size:32px">💼</div>
+        <div class="channel-card-body">
+          <span class="channel-badge t1">Tier 1 — Recommended</span>
+          <h3>LinkedIn Professional</h3>
+          <p>Primary target for inbound and outbound consulting. Leverage verified peer proof cards.</p>
+          <div class="channel-wrap-guide">
+            <strong>Safety-Wrap Guardrail:</strong> Always redirect prospects from comments/messages to a structured Topmate call. Never quote hourly pricing on chat.
+          </div>
+        </div>
+      </div>
+
+      <div class="channel-card">
+        <div style="font-size:32px">⏱️</div>
+        <div class="channel-card-body">
+          <span class="channel-badge t2">Tier 2 — Landing Page</span>
+          <h3>Topmate Consulting</h3>
+          <p>Perfect for structured 30-minute expert consulting sessions. High-conversion inbound tool.</p>
+          <div class="channel-wrap-guide">
+            <strong>Safety-Wrap Guardrail:</strong> Charge 100% pre-payment inside Topmate before scheduling. Cap calls strictly at 30 minutes to manage your 6h/week commitment.
+          </div>
+        </div>
+      </div>
+
+      <div class="channel-card" id="upwork-channel-card">
+        <div style="font-size:32px">🛡️</div>
+        <div class="channel-card-body">
+          <span class="channel-badge t2" id="upwork-badge-text">Tier 2 — Guarded Access</span>
+          <h3 id="upwork-title-text">Upwork (Safety Wrap Enabled)</h3>
+          <p id="upwork-desc-text">For clients seeking mobile & UX designers. Pre-configured filters active.</p>
+          <div class="channel-wrap-guide" id="upwork-guide-text">
+            <strong>Safety-Wrap Guardrail:</strong> Strict escrow contract activated. Never share email address before contract is funded. Minimum project value: ₹15,000.
+          </div>
+        </div>
+      </div>
+
+      <div class="channel-card" style="opacity:0.55" id="fiverr-channel-card">
+        <div style="font-size:32px">🚫</div>
+        <div class="channel-card-body">
+          <span class="channel-badge t3" style="background:#FFEBEE;color:var(--danger)">Tier 3 — Excluded</span>
+          <h3>Fiverr (Guarded Exclusion)</h3>
+          <p>Freelance marketplace offering low cost consulting. Deliberately locked out of profile recommendations.</p>
+          <div class="channel-wrap-guide" style="border-left-color:var(--danger)">
+            <strong>Rationale:</strong> Direct violation of the Burnt Starter target rate. Fosters transactional, cheap scope-creep behavior that induces paralysis. Excluded.
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
        BOTTOM NAVIGATION
   ══════════════════════════════════════════ -->
   <nav class="bottom-nav">
-    <div class="nav-item active" id="nav-home" onclick="navigate('home')">
+    <div class="nav-item" id="nav-home" onclick="navigate('home')">
       <div class="nav-icon">⊞</div>
       <div class="nav-label">Home</div>
       <div class="nav-dot"></div>
@@ -1590,14 +2220,19 @@
       <div class="nav-dot"></div>
     </div>
     <div class="nav-plus" onclick="openLogModal()" title="Log Earnings">＋</div>
-    <div class="nav-item" id="nav-metrics" onclick="navigate('metrics')">
-      <div class="nav-icon">📊</div>
-      <div class="nav-label">Metrics</div>
+    <div class="nav-item" id="nav-copilot" onclick="navigate('copilot')">
+      <div class="nav-icon">🤖</div>
+      <div class="nav-label">Co-Pilot</div>
       <div class="nav-dot"></div>
     </div>
-    <div class="nav-item" id="nav-journey" onclick="navigate('journey')">
-      <div class="nav-icon">🗺</div>
-      <div class="nav-label">Risks</div>
+    <div class="nav-item" id="nav-cohort" onclick="navigate('cohort')">
+      <div class="nav-icon">💬</div>
+      <div class="nav-label">Cohort</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-specs" onclick="navigate('specs')">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Specs Hub</div>
       <div class="nav-dot"></div>
     </div>
   </nav>
@@ -1702,8 +2337,25 @@
 
 <script>
   // ── Navigation ──────────────────────────────────────────
-  const screens = { home: 'screen-home', plan: 'screen-plan', caps: 'screen-caps', metrics: 'screen-metrics', journey: 'screen-journey' };
-  const navIds  = { home: 'nav-home', plan: 'nav-plan', metrics: 'nav-metrics', journey: 'nav-journey' };
+  const screens = { 
+    onboarding: 'screen-onboarding',
+    home: 'screen-home', 
+    plan: 'screen-plan', 
+    copilot: 'screen-copilot',
+    cohort: 'screen-cohort',
+    specs: 'screen-specs',
+    caps: 'screen-caps', 
+    metrics: 'screen-metrics', 
+    journey: 'screen-journey',
+    channels: 'screen-channels'
+  };
+  const navIds  = { 
+    home: 'nav-home', 
+    plan: 'nav-plan', 
+    copilot: 'nav-copilot',
+    cohort: 'nav-cohort',
+    specs: 'nav-specs'
+  };
 
   function navigate(key) {
     Object.values(screens).forEach(id => {
@@ -1714,6 +2366,18 @@
       const el = document.getElementById(id);
       if (el) el.classList.remove('active');
     });
+    
+    // Progressive Onboarding UI State Gate: Hide Bottom Nav during Onboarding
+    const nav = document.querySelector('.bottom-nav');
+    const fab = document.getElementById('screenshot-fab');
+    if (key === 'onboarding') {
+      if (nav) nav.style.display = 'none';
+      if (fab) fab.style.display = 'none';
+    } else {
+      if (nav) nav.style.display = 'flex';
+      if (fab) fab.style.display = 'flex';
+    }
+
     const target = document.getElementById(screens[key]);
     if (target) { target.classList.add('active'); target.scrollTop = 0; window.scrollTo(0,0); }
     if (navIds[key]) document.getElementById(navIds[key]).classList.add('active');
@@ -1869,6 +2533,331 @@
       });
     }, 500);
   }
+
+  // ── ONBOARDING WIZARD SIMULATOR ────────────────────────────
+  let onboardCurrentStep = 1;
+  let selectedSkill = "";
+  let selectedFailureMode = "";
+  let profile = {
+    completed: false,
+    skill: "",
+    failureMode: "",
+    hours: 6,
+    target: 50000
+  };
+
+  const skillsTaxonomy = [
+    "Product UI Design", "Mobile App UX", "Fintech Consultant",
+    "Figma Prototyping", "UX Copywriting", "Webflow Developer",
+    "React Frontend Dev", "SaaS Growth Marketer", "SEO Copywriting",
+    "API Integration Expert", "Technical Writer", "E-commerce Dev"
+  ];
+
+  function populateSkills() {
+    const container = document.getElementById('onboard-skills-container');
+    if (!container) return;
+    container.innerHTML = "";
+    skillsTaxonomy.forEach(skill => {
+      const pill = document.createElement('div');
+      pill.className = 'skill-pill';
+      pill.textContent = skill;
+      pill.onclick = () => selectSkillPill(pill, skill);
+      container.appendChild(pill);
+    });
+  }
+
+  function selectSkillPill(pill, skill) {
+    document.querySelectorAll('.skill-pill').forEach(p => p.classList.remove('selected'));
+    pill.classList.add('selected');
+    selectedSkill = skill;
+    showToast(`Skill selected: ${skill}`);
+  }
+
+  function selectFailure(card, mode) {
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedFailureMode = mode;
+    showToast(`Failure mode locked: ${mode.toUpperCase()}`);
+  }
+
+  function updateOnboardProgressBar() {
+    const fill = document.getElementById('onboard-progress');
+    const pct = (onboardCurrentStep / 3) * 100;
+    if (fill) fill.style.width = pct + '%';
+  }
+
+  function nextOnboardStep() {
+    if (onboardCurrentStep === 1) {
+      if (!selectedSkill) {
+        showToast('⚠️ Please select a primary skill first.');
+        return;
+      }
+      onboardCurrentStep = 2;
+      document.getElementById('onboard-step-1').classList.remove('active');
+      document.getElementById('onboard-step-2').classList.add('active');
+      document.getElementById('onboard-back-btn').style.display = 'block';
+    } else if (onboardCurrentStep === 2) {
+      if (!selectedFailureMode) {
+        showToast('⚠️ Please select your previous failure mode.');
+        return;
+      }
+      onboardCurrentStep = 3;
+      document.getElementById('onboard-step-2').classList.remove('active');
+      document.getElementById('onboard-step-3').classList.add('active');
+      document.getElementById('onboard-next-btn').textContent = 'Generate Profile 🚀';
+    } else if (onboardCurrentStep === 3) {
+      // Compile & lock profile
+      profile.completed = true;
+      profile.skill = selectedSkill;
+      profile.failureMode = selectedFailureMode;
+      profile.hours = parseInt(document.getElementById('onboard-hours-slider').value);
+      profile.target = parseInt(document.getElementById('onboard-target-slider').value);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem('second_salary_profile', JSON.stringify(profile));
+      
+      showToast('🌟 Creating your personalized infrastructure...');
+      
+      setTimeout(() => {
+        syncProfileToUI();
+        navigate('home');
+      }, 1000);
+    }
+    updateOnboardProgressBar();
+  }
+
+  function prevOnboardStep() {
+    if (onboardCurrentStep === 2) {
+      onboardCurrentStep = 1;
+      document.getElementById('onboard-step-2').classList.remove('active');
+      document.getElementById('onboard-step-1').classList.add('active');
+      document.getElementById('onboard-back-btn').style.display = 'none';
+    } else if (onboardCurrentStep === 3) {
+      onboardCurrentStep = 2;
+      document.getElementById('onboard-step-3').classList.remove('active');
+      document.getElementById('onboard-step-2').classList.add('active');
+      document.getElementById('onboard-next-btn').textContent = 'Continue';
+    }
+    updateOnboardProgressBar();
+  }
+
+  // ── STATE SYNCHRONIZATION (Profile ➔ UI) ────────────────────
+  function syncProfileToUI() {
+    const raw = localStorage.getItem('second_salary_profile');
+    if (!raw) return;
+    profile = JSON.parse(raw);
+
+    // 1. Update Greeting and Dashboard Info
+    const greeting = document.querySelector('.top-header .greeting');
+    if (greeting) greeting.textContent = `Good evening, ${profile.skill} 👋`;
+    
+    const targetLabel = document.querySelector('.stat-row .stat-pill:last-child .stat-val');
+    if (targetLabel) targetLabel.textContent = `₹${(profile.target / 1000).toFixed(0)}K`;
+
+    // 2. Pricing Calculator default values sync
+    const calcIncome = document.getElementById('calc-income');
+    const calcHours = document.getElementById('calc-hours');
+    if (calcIncome) calcIncome.value = profile.target;
+    if (calcHours) calcHours.value = profile.hours;
+    updatePricingCalc();
+
+    // 3. Dynamic Plan Adaptation based on Failure Mode
+    const dayDetail1 = document.querySelector('.cap-list .day-card:nth-child(1) .day-detail p');
+    const dayDetail2 = document.querySelector('.cap-list .day-card:nth-child(2) .day-detail p');
+    const dayDetail4 = document.querySelector('.cap-list .day-card:nth-child(4) .day-detail p');
+
+    if (profile.failureMode === 'ghosted') {
+      if (dayDetail1) dayDetail1.innerHTML = `<strong>Script provided:</strong> "Freelance ${profile.skill} open to consulting. Strict 50% upfront payment term for all new project scopes."`;
+      if (dayDetail4) dayDetail4.innerHTML = `<strong>Script:</strong> "Hi [Name], I specialize in ${profile.skill}. I noticed [Company] is building [feature]. I have pre-designed escrow templates ready to secure the contract and protect deliverables. Let's talk?"`;
+    } else if (profile.failureMode === 'scope') {
+      if (dayDetail2) dayDetail2.innerHTML = `<strong>Template:</strong> "Here is how I outline strict revisions limits on projects so that scope creep never stalls a launch..."`;
+      if (dayDetail4) dayDetail4.innerHTML = `<strong>Script:</strong> "I limit all design milestones to 2 strict iteration cycles. This ensures your project ships 3 weeks faster than traditional consultancies."`;
+    } else if (profile.failureMode === 'underpriced') {
+      if (dayDetail1) dayDetail1.innerHTML = `<strong>Script provided:</strong> "I quote direct project rates with a built-in 1.5x value-buffer so scope changes are handled without price renegotiations."`;
+    }
+
+    // 4. Upwork Channel Guardrails Sync based on skill
+    const upworkTitle = document.getElementById('upwork-title-text');
+    const upworkDesc = document.getElementById('upwork-desc-text');
+    const upworkGuide = document.getElementById('upwork-guide-text');
+    
+    if (profile.skill.includes('Design') || profile.skill.includes('Figma')) {
+      if (upworkTitle) upworkTitle.textContent = "Upwork Design Shield";
+      if (upworkDesc) upworkDesc.textContent = `Optimized for ${profile.skill} proposals. Blocks clients offering under ₹1,500/hour.`;
+      if (upworkGuide) upworkGuide.innerHTML = `<strong>Safety-Wrap Guardrail:</strong> Never start work without a funded Escrow milestone. Figma edit access remains locked until milestone is approved.`;
+    } else {
+      if (upworkTitle) upworkTitle.textContent = "Upwork Service Shield";
+      if (upworkDesc) upworkDesc.textContent = `Optimized for ${profile.skill} packages. Filters out clients without verified payment methods.`;
+    }
+
+    // 5. Cohort prompt sync
+    const challengeText = document.getElementById('cohort-challenge-text');
+    if (challengeText) {
+      challengeText.innerHTML = `Day 9 Target: Draft your **${profile.skill}** proposal. Because your last attempt failed due to **${profile.failureMode.toUpperCase()}**, the AI Co-Pilot has loaded custom protective guardrails into your drafts below!`;
+    }
+  }
+
+  function resetProfileSimulation() {
+    localStorage.removeItem('second_salary_profile');
+    onboardCurrentStep = 1;
+    selectedSkill = "";
+    selectedFailureMode = "";
+    
+    // Clear styles
+    document.querySelectorAll('.skill-pill').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    
+    // Reset wizard active step
+    document.getElementById('onboard-step-2').classList.remove('active');
+    document.getElementById('onboard-step-3').classList.remove('active');
+    document.getElementById('onboard-step-1').classList.add('active');
+    document.getElementById('onboard-back-btn').style.display = 'none';
+    document.getElementById('onboard-next-btn').textContent = 'Continue';
+    updateOnboardProgressBar();
+    
+    showToast('🔄 Profile reset successfully!');
+    navigate('onboarding');
+  }
+
+  // ── AI CO-PILOT WORKSPACE LOGIC ────────────────────────────
+  function switchCopilotTab(tabId) {
+    document.querySelectorAll('.copilot-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.copilot-panel').forEach(p => p.classList.remove('active'));
+    
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    document.getElementById(`panel-${tabId}`).classList.add('active');
+  }
+
+  function generateProposal() {
+    const client = document.getElementById('prop-client').value || "Fintech startup";
+    const scope = document.getElementById('prop-scope').value || "5 mobile dashboard screens";
+    const tone = document.getElementById('prop-tone').value;
+    
+    const outputWrap = document.getElementById('proposal-output-wrap');
+    const outputText = document.getElementById('proposal-text');
+    
+    showToast('🤖 AI Co-Pilot drafting pitch...');
+    
+    let proposalBody = "";
+    if (tone === 'collaborative') {
+      proposalBody = `Hi ${client.split(',')[0]} Team,\n\nI noticed you are currently hiring for a ${profile.skill} to build out ${scope}.\n\nInstead of a standard agency engagement, I provide peer-to-peer consulting (max 6h/week) focused exclusively on shipping your core product. Given my background in ${profile.skill}, I have built specific protective guardrails so we avoid traditional blockers:\n\n1. Scope constraint: Custom delivery in defined Figma design sprints.\n2. Protected delivery: 50% upfront payment via safe escrow milestone, guaranteeing dedicated scheduling.\n\nWould a brief 15-minute alignment call be useful this Thursday?\n\nBest,\n[Your Name]`;
+    } else {
+      proposalBody = `Subject: ${profile.skill} Consulting Proposal — ${client.split(',')[0]}\n\nHello,\n\nI specialize in ${profile.skill} and would love to help you Redesign ${scope}.\n\nMy package targets immediate results with a defined scope of deliverables:\n- ${scope}\n- Custom Figma interactive components\n- 2 strict revision cycles included\n\nRate: ₹${(profile.target / 2).toLocaleString('en-IN')} (Fixed package price, 50% upfront, 50% on project delivery).\n\nLet's get this shipped.\n\nRegards,\n[Your Name]`;
+    }
+    
+    setTimeout(() => {
+      outputText.textContent = proposalBody;
+      outputWrap.style.display = 'block';
+      showToast('✓ Proposal Pitch generated!');
+    }, 800);
+  }
+
+  function generateContract() {
+    const fee = document.getElementById('contract-fee').value || "50000";
+    const revisions = document.getElementById('contract-revisions').value;
+    
+    const outputWrap = document.getElementById('contract-output-wrap');
+    const outputText = document.getElementById('contract-text');
+    
+    showToast('📝 Crafting protective clauses...');
+    
+    const formattedFee = parseInt(fee).toLocaleString('en-IN');
+    const deposit = (parseInt(fee) * 0.5).toLocaleString('en-IN');
+    
+    const contractBody = `=== SECTION 1: SCOPE OF WORK ===\nThe Consultant will deliver exactly: Figma prototype files, final UI assets, and up to 2 design mockups. Any deliverables not listed are strictly out-of-scope.\n\n=== SECTION 2: PAYMENT SCHEDULE (PROTECTIVE) ===\n1. Initial Retainer Deposit: ₹${deposit} (50% of project total) paid upfront prior to work kickoff.\n2. Milestone 2 Completion: Final payment of ₹${deposit} (50%) due strictly upon delivery.\n\n=== SECTION 3: REVISIONS LIMIT ===\nThis project fee includes exactly ${revisions} cycle(s) of written revisions. Any revision cycles requested beyond this limit will be billed as a separate scope amendment at an hourly rate of ₹${Math.round(profile.target / (profile.hours * 4)).toLocaleString('en-IN')}/hour.\n\n=== SECTION 4: KILL-FEE PROTECTION ===\nIf the client terminates this agreement or goes silent for more than 14 consecutive business days, the initial 50% deposit remains 100% non-refundable, and a 30% kill fee on the remaining balance is instantly outstanding.`;
+    
+    setTimeout(() => {
+      outputText.textContent = contractBody;
+      outputWrap.style.display = 'block';
+      showToast('✓ Protective contract generated!');
+    }, 800);
+  }
+
+  function updatePricingCalc() {
+    const targetIncome = parseInt(document.getElementById('calc-income').value);
+    const weeklyHours = parseInt(document.getElementById('calc-hours').value);
+    
+    document.getElementById('calc-income-val').textContent = '₹' + targetIncome.toLocaleString('en-IN');
+    document.getElementById('calc-hours-val').textContent = weeklyHours + ' hrs';
+    
+    // Core math: Target Income divided by 4 weeks, divided by hours/week
+    const hourlyRate = Math.round(targetIncome / (weeklyHours * 4.3));
+    const projectAnchor = Math.round(hourlyRate * weeklyHours * 1.5 * 4); // 1.5x value buffer
+    
+    document.getElementById('calc-res-hourly').textContent = '₹' + hourlyRate.toLocaleString('en-IN');
+    document.getElementById('calc-res-retainer').textContent = '₹' + targetIncome.toLocaleString('en-IN');
+    document.getElementById('calc-res-project').textContent = '₹' + projectAnchor.toLocaleString('en-IN');
+  }
+
+  function copyCopilotText(elementId) {
+    const text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text);
+    showToast('✓ Copied to clipboard!');
+  }
+
+  // ── ASYNC PEER COHORTS CHATBOARD LOGIC ───────────────────────
+  function handleChatKeyPress(e) {
+    if (e.key === 'Enter') {
+      sendCohortMessage();
+    }
+  }
+
+  function sendCohortMessage() {
+    const input = document.getElementById('chat-input-field');
+    const container = document.getElementById('chat-messages-container');
+    
+    if (!input || !input.value.trim()) return;
+    
+    const text = input.value.trim();
+    input.value = "";
+    
+    // Render user message bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-bubble right';
+    userBubble.innerHTML = `
+      <div class="chat-avatar me">ME</div>
+      <div class="chat-bubble-body">
+        <div class="chat-user-name">You (${profile.skill})</div>
+        <p class="chat-text">${text}</p>
+        <div class="chat-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+      </div>
+    `;
+    container.appendChild(userBubble);
+    container.scrollTop = container.scrollHeight;
+    
+    // Trigger simulated peer response with a slight delay
+    showToast('💬 Sneha T. is typing...');
+    setTimeout(() => {
+      const peerBubble = document.createElement('div');
+      peerBubble.className = 'chat-bubble left';
+      peerBubble.innerHTML = `
+        <div class="chat-avatar a3">ST</div>
+        <div class="chat-bubble-body">
+          <div class="chat-user-name">Sneha T.</div>
+          <p class="chat-text">Love that perspective! That fits perfectly with our Day 9 goal. The protective scope contract is exactly what keeps clients in line.</p>
+          <div class="chat-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+      `;
+      container.appendChild(peerBubble);
+      container.scrollTop = container.scrollHeight;
+      showToast('New message from cohort');
+    }, 2000);
+  }
+
+  // ── ON LOAD INITIALIZATION ─────────────────────────────────
+  window.addEventListener('load', () => {
+    populateSkills();
+    
+    const raw = localStorage.getItem('second_salary_profile');
+    if (raw) {
+      // Profile exists, load dashboard home screen
+      syncProfileToUI();
+      navigate('home');
+    } else {
+      // Profile empty, launch onboarding wizard first
+      navigate('onboarding');
+    }
+  });
 </script>
 </body>
 </html>
