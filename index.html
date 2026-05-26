@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second Salary — PRD Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────────── */
+    :root {
+      --teal:        #1B4D57;
+      --teal-light:  #2A6475;
+      --teal-dark:   #133840;
+      --orange:      #F5A623;
+      --orange-light:#FFC85A;
+      --orange-dark: #D4881A;
+      --cream:       #FFF3E8;
+      --cream-dark:  #FFE8CC;
+      --bg:          #F7F8FA;
+      --white:       #FFFFFF;
+      --text-dark:   #1A1A2E;
+      --text-mid:    #4A5568;
+      --text-light:  #9AA5B4;
+      --border:      #EDF0F5;
+      --success:     #4CAF8A;
+      --danger:      #E05A5A;
+      --radius-sm:   10px;
+      --radius-md:   18px;
+      --radius-lg:   26px;
+      --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md:   0 8px 24px rgba(0,0,0,0.10);
+      --shadow-lg:   0 16px 40px rgba(0,0,0,0.14);
+      --nav-h:       80px;
+    }
+
+    /* ─────────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────────
+       APP SHELL
+    ───────────────────────────────────────────── */
+    .app-shell {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ─────────────────────────────────────────────
+       SCREENS
+    ───────────────────────────────────────────── */
+    .screen {
+      display: none;
+      padding: 0 0 calc(var(--nav-h) + 16px);
+      min-height: 100vh;
+      animation: fadeSlideIn 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─────────────────────────────────────────────
+       TOP HEADER (shared)
+    ───────────────────────────────────────────── */
+    .top-header {
+      padding: 52px 24px 24px;
+      background: var(--white);
+    }
+    .top-header .greeting { font-size: 13px; color: var(--text-light); font-weight: 500; }
+    .top-header h1 {
+      font-size: 26px; font-weight: 800; line-height: 1.2;
+      margin-top: 4px; color: var(--text-dark);
+    }
+    .top-header h1 span { color: var(--orange); }
+    .top-header .avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--teal); display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 16px;
+      float: right; margin-top: -38px;
+      box-shadow: 0 4px 12px rgba(27,77,87,0.3);
+    }
+
+    /* ─────────────────────────────────────────────
+       HERO CARD
+    ───────────────────────────────────────────── */
+    .hero-card {
+      margin: 20px 20px 0;
+      background: var(--teal);
+      border-radius: var(--radius-lg);
+      padding: 22px 22px 22px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--shadow-lg);
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute; bottom: -50px; left: 30px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .hero-card .hero-text { flex: 1; }
+    .hero-card .hero-text p {
+      color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 500;
+    }
+    .hero-card .hero-text .hero-amount {
+      font-size: 34px; font-weight: 800; color: white; margin: 4px 0 12px;
+      letter-spacing: -0.5px;
+    }
+    .hero-card .hero-text .hero-amount span { font-size: 18px; }
+    .hero-btn {
+      background: var(--orange); color: white;
+      border: none; border-radius: 24px;
+      padding: 10px 18px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+      position: relative; z-index: 1;
+    }
+    .hero-btn:hover { background: var(--orange-dark); transform: translateY(-1px); }
+
+    /* ─────────────────────────────────────────────
+       CIRCULAR PROGRESS
+    ───────────────────────────────────────────── */
+    .circular-progress {
+      position: relative; width: 72px; height: 72px;
+      flex-shrink: 0; margin-left: 12px;
+    }
+    .circular-progress svg { transform: rotate(-90deg); }
+    .circular-progress .pct {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px; font-weight: 800; color: white;
+    }
+    .ring-bg { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 6; }
+    .ring-fill {
+      fill: none; stroke: var(--orange);
+      stroke-width: 6; stroke-linecap: round;
+      transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION LABEL
+    ───────────────────────────────────────────── */
+    .section-label {
+      padding: 20px 24px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-label h2 { font-size: 17px; font-weight: 700; color: var(--text-dark); }
+    .section-label a {
+      font-size: 13px; font-weight: 600; color: var(--orange);
+      text-decoration: none; cursor: pointer;
+    }
+
+    /* ─────────────────────────────────────────────
+       STAT PILLS ROW
+    ───────────────────────────────────────────── */
+    .stat-row {
+      display: flex; gap: 12px; padding: 0 20px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .stat-row::-webkit-scrollbar { display: none; }
+    .stat-pill {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      min-width: 110px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .stat-pill .stat-val {
+      font-size: 20px; font-weight: 800; color: var(--text-dark);
+    }
+    .stat-pill .stat-val.orange { color: var(--orange); }
+    .stat-pill .stat-val.teal   { color: var(--teal); }
+    .stat-pill .stat-val.green  { color: var(--success); }
+    .stat-pill .stat-label { font-size: 11px; color: var(--text-light); font-weight: 500; margin-top: 4px; }
+
+    /* ─────────────────────────────────────────────
+       DAY PLAN CARDS (2-col grid)
+    ───────────────────────────────────────────── */
+    .card-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; padding: 0 20px;
+    }
+    .day-card {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 16px; cursor: pointer;
+      transition: all 0.22s;
+      position: relative; overflow: hidden;
+      border: 1.5px solid transparent;
+    }
+    .day-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .day-card.active-card {
+      background: var(--teal); color: white;
+      border-color: var(--teal);
+    }
+    .day-card.completed {
+      border-color: var(--success);
+    }
+    .day-card.completed::after {
+      content: '✓';
+      position: absolute; top: 10px; right: 10px;
+      width: 20px; height: 20px;
+      background: var(--success); color: white;
+      border-radius: 50%; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .day-card .day-num {
+      font-size: 10px; font-weight: 700; color: var(--orange);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .day-card.active-card .day-num { color: var(--orange-light); }
+    .day-card h3 { font-size: 13px; font-weight: 700; margin-top: 6px; line-height: 1.3; }
+    .day-card.active-card h3 { color: white; }
+    .day-card p { font-size: 11px; color: var(--text-mid); margin-top: 4px; line-height: 1.4; }
+    .day-card.active-card p { color: rgba(255,255,255,0.75); }
+    .day-card .time-chip {
+      display: inline-block; margin-top: 10px;
+      background: rgba(245,166,35,0.15); color: var(--orange-dark);
+      border-radius: 20px; padding: 3px 8px;
+      font-size: 10px; font-weight: 600;
+    }
+    .day-card.active-card .time-chip {
+      background: rgba(255,255,255,0.15); color: white;
+    }
+    .day-card.locked { opacity: 0.45; pointer-events: none; filter: grayscale(0.3); }
+
+    /* Wide card (full width) */
+    .day-card.wide {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--teal-dark);
+    }
+    .day-card.wide h3, .day-card.wide p { color: white; }
+    .day-card.wide .day-num { color: var(--orange-light); }
+    .day-card.wide .more-badge {
+      background: var(--orange); color: white;
+      border-radius: var(--radius-sm); padding: 6px 12px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+
+    /* ─────────────────────────────────────────────
+       CAPABILITY LIST (capabilities screen)
+    ───────────────────────────────────────────── */
+    .cap-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+    .cap-item {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex; align-items: flex-start; gap: 14px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.22s;
+      border: 1.5px solid var(--border);
+    }
+    .cap-item:hover { transform: translateX(4px); border-color: var(--orange); box-shadow: var(--shadow-md); }
+    .cap-icon {
+      width: 46px; height: 46px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .cap-icon.c1 { background: #E8F5E9; }
+    .cap-icon.c2 { background: #FFF8E1; }
+    .cap-icon.c3 { background: #E3F2FD; }
+    .cap-icon.c4 { background: #FCE4EC; }
+    .cap-icon.c5 { background: #F3E5F5; }
+    .cap-icon.c6 { background: #E0F2F1; }
+    .cap-icon.c7 { background: #FBE9E7; }
+    .cap-icon.c8 { background: #E8EAF6; }
+    .cap-body { flex: 1; }
+    .cap-body .cap-num { font-size: 10px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+    .cap-body h3 { font-size: 15px; font-weight: 700; margin-top: 2px; color: var(--text-dark); }
+    .cap-body p { font-size: 12px; color: var(--text-mid); margin-top: 4px; line-height: 1.5; }
+    .cap-tag {
+      display: inline-block; margin-top: 8px;
+      background: var(--cream); color: var(--orange-dark);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 10px; font-weight: 700;
+    }
+    .cap-tag.must { background: #FFF3E8; color: var(--orange-dark); }
+    .cap-tag.should { background: #E8F5E9; color: #2E7D32; }
+    .cap-arrow { font-size: 18px; color: var(--text-light); align-self: center; flex-shrink: 0; }
+
+    /* ─────────────────────────────────────────────
+       METRICS SCREEN
+    ───────────────────────────────────────────── */
+    .metrics-hero {
+      margin: 20px 20px 0;
+      background: var(--teal);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .metrics-hero p { color: rgba(255,255,255,0.7); font-size: 13px; }
+    .metrics-hero .big-num { font-size: 40px; font-weight: 800; color: white; margin: 4px 0; }
+    .metrics-hero .big-num span { font-size: 20px; }
+    .metrics-hero .target-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    .metrics-hero .target-label { font-size: 12px; color: rgba(255,255,255,0.65); }
+    .progress-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--orange); border-radius: 3px; transition: width 1s ease; }
+    .metrics-hero .target-pct { font-size: 13px; font-weight: 700; color: var(--orange); }
+
+    .metric-cards { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; }
+    .metric-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .metric-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .metric-dot.primary  { background: var(--orange); }
+    .metric-dot.secondary { background: var(--teal); }
+    .metric-dot.biz      { background: var(--success); }
+    .metric-body { flex: 1; }
+    .metric-body .metric-name { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .metric-body .metric-def  { font-size: 12px; color: var(--text-mid); margin-top: 2px; line-height: 1.4; }
+    .metric-target { text-align: right; flex-shrink: 0; }
+    .metric-target .target-val { font-size: 16px; font-weight: 800; color: var(--orange); }
+    .metric-target .target-unit { font-size: 10px; color: var(--text-light); display: block; margin-top: 1px; }
+
+    /* ─────────────────────────────────────────────
+       RISKS SCREEN
+    ───────────────────────────────────────────── */
+    .risk-cards { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; }
+    .risk-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--orange);
+      cursor: pointer;
+      transition: all 0.22s;
+    }
+    .risk-card:hover { box-shadow: var(--shadow-md); }
+    .risk-card.existential { border-left-color: var(--danger); }
+    .risk-card.medium      { border-left-color: var(--orange); }
+    .risk-card.low         { border-left-color: var(--success); }
+    .risk-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .risk-header h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .risk-badge {
+      font-size: 10px; font-weight: 700; border-radius: 20px; padding: 3px 9px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .risk-badge.existential { background: #FFEBEE; color: var(--danger); }
+    .risk-badge.high        { background: #FFF8E1; color: var(--orange-dark); }
+    .risk-badge.medium      { background: #FFF8E1; color: var(--orange-dark); }
+    .risk-badge.low         { background: #E8F5E9; color: #2E7D32; }
+    .risk-body { font-size: 12px; color: var(--text-mid); margin-top: 8px; line-height: 1.5; }
+    .risk-mitigation {
+      margin-top: 12px; padding: 10px 12px;
+      background: var(--cream); border-radius: var(--radius-sm);
+      font-size: 11px; color: var(--text-mid); line-height: 1.5;
+      display: none;
+    }
+    .risk-card.open .risk-mitigation { display: block; }
+    .risk-footer { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+    .risk-footer span { font-size: 11px; color: var(--text-light); }
+    .risk-arrow { font-size: 14px; color: var(--text-light); margin-left: auto; transition: transform 0.2s; }
+    .risk-card.open .risk-arrow { transform: rotate(180deg); }
+
+    /* ─────────────────────────────────────────────
+       JOURNEY SCREEN
+    ───────────────────────────────────────────── */
+    .journey-tabs {
+      display: flex; gap: 8px; padding: 0 20px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .journey-tabs::-webkit-scrollbar { display: none; }
+    .journey-tab {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 8px 16px;
+      font-size: 12px; font-weight: 600; color: var(--text-mid);
+      cursor: pointer; white-space: nowrap; transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .journey-tab.active { background: var(--teal); color: white; border-color: var(--teal); }
+    .journey-tab:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+
+    .journey-content { padding: 16px 20px 0; }
+    .journey-panel { display: none; }
+    .journey-panel.active { display: block; }
+
+    .journey-timeline { position: relative; }
+    .timeline-step {
+      display: flex; gap: 16px; padding-bottom: 24px;
+      position: relative;
+    }
+    .timeline-step:last-child { padding-bottom: 0; }
+    .timeline-left { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+    .timeline-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--teal); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+      box-shadow: 0 0 0 4px var(--cream);
+    }
+    .timeline-dot.orange-dot { background: var(--orange); }
+    .timeline-line {
+      width: 2px; flex: 1; background: var(--border); margin-top: 4px;
+    }
+    .timeline-step:last-child .timeline-line { display: none; }
+    .timeline-body { flex: 1; padding-top: 6px; }
+    .timeline-body .t-label { font-size: 10px; font-weight: 700; color: var(--orange); text-transform: uppercase; letter-spacing: 0.5px; }
+    .timeline-body h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-top: 2px; }
+    .timeline-body p { font-size: 12px; color: var(--text-mid); margin-top: 4px; line-height: 1.5; }
+    .timeline-card {
+      margin-top: 10px; padding: 12px;
+      background: var(--cream); border-radius: var(--radius-sm);
+      font-size: 12px; color: var(--text-mid);
+      border-left: 3px solid var(--orange);
+    }
+
+    /* ─────────────────────────────────────────────
+       CRISIS BUTTON (floating on home)
+    ───────────────────────────────────────────── */
+    .crisis-btn {
+      margin: 20px 20px 0;
+      background: var(--white);
+      border: 1.5px solid var(--danger);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: all 0.22s;
+      box-shadow: var(--shadow-sm);
+    }
+    .crisis-btn:hover { background: #FFEBEE; box-shadow: var(--shadow-md); }
+    .crisis-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: #FFEBEE; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .crisis-btn .crisis-text h4 { font-size: 14px; font-weight: 700; color: var(--danger); }
+    .crisis-btn .crisis-text p  { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+    .crisis-btn .crisis-arrow { margin-left: auto; font-size: 18px; color: var(--danger); }
+
+    /* ─────────────────────────────────────────────
+       CONFIDENCE SLIDER
+    ───────────────────────────────────────────── */
+    .confidence-card {
+      margin: 20px 20px 0;
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+    }
+    .confidence-card .conf-header { display: flex; align-items: center; justify-content: space-between; }
+    .confidence-card h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .confidence-card .conf-val { font-size: 22px; font-weight: 800; color: var(--orange); }
+    .confidence-card p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+    .slider-wrap { margin-top: 14px; }
+    .conf-slider {
+      width: 100%; -webkit-appearance: none;
+      height: 6px; border-radius: 3px;
+      background: linear-gradient(to right, var(--orange) 0%, var(--orange) 70%, var(--border) 70%, var(--border) 100%);
+      outline: none; cursor: pointer;
+    }
+    .conf-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px;
+      border-radius: 50%; background: var(--orange);
+      box-shadow: 0 2px 8px rgba(245,166,35,0.5);
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .conf-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .conf-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+    .conf-labels span { font-size: 10px; color: var(--text-light); }
+
+    /* ─────────────────────────────────────────────
+       BOTTOM NAVIGATION
+    ───────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      height: var(--nav-h);
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 0 16px;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      cursor: pointer; padding: 8px 14px;
+      transition: all 0.2s; border-radius: var(--radius-sm);
+    }
+    .nav-item:hover { background: var(--cream); }
+    .nav-item .nav-icon { font-size: 22px; color: var(--text-light); transition: color 0.2s; }
+    .nav-item .nav-label { font-size: 10px; font-weight: 600; color: var(--text-light); transition: color 0.2s; }
+    .nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--teal); }
+    .nav-item.active .nav-icon { color: var(--teal); }
+    .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); margin-top: 2px; opacity: 0; transition: opacity 0.2s; }
+    .nav-item.active .nav-dot { opacity: 1; }
+
+    .nav-plus {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 6px 20px rgba(245,166,35,0.45);
+      font-size: 26px; color: white; font-weight: 300;
+      margin-top: -20px;
+    }
+    .nav-plus:hover { background: var(--orange-dark); transform: scale(1.08) translateY(-2px); }
+
+    /* ─────────────────────────────────────────────
+       MODAL (Log Earnings / Crisis Triage)
+    ───────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-sheet {
+      background: var(--white);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      width: 100%; max-width: 430px;
+      padding: 24px 24px 40px;
+      animation: slideUp 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp  { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-handle {
+      width: 40px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 0 auto 20px;
+    }
+    .modal-sheet h2 { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+    .modal-sheet p  { font-size: 13px; color: var(--text-mid); margin-top: 6px; }
+    .form-field { margin-top: 16px; }
+    .form-field label { font-size: 12px; font-weight: 600; color: var(--text-mid); display: block; margin-bottom: 6px; }
+    .form-field input, .form-field select {
+      width: 100%; padding: 13px 16px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 15px; font-family: 'Inter', sans-serif;
+      outline: none; background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: var(--orange); }
+    .modal-btn {
+      width: 100%; margin-top: 20px;
+      background: var(--orange); color: white;
+      border: none; border-radius: var(--radius-md);
+      padding: 15px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 6px 20px rgba(245,166,35,0.4);
+    }
+    .modal-btn:hover { background: var(--orange-dark); transform: translateY(-1px); }
+    .modal-close {
+      position: absolute; top: 20px; right: 24px;
+      font-size: 20px; cursor: pointer; color: var(--text-light);
+      background: var(--bg); border-radius: 50%;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─────────────────────────────────────────────
+       TOAST
+    ───────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--teal-dark); color: white;
+      padding: 12px 22px; border-radius: 24px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 300; opacity: 0;
+      transition: all 0.3s cubic-bezier(.4,0,.2,1);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─────────────────────────────────────────────
+       NEXT ACTION CARD
+    ───────────────────────────────────────────── */
+    .next-action {
+      margin: 12px 20px 0;
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .next-action .action-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-sm);
+      background: var(--cream); display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .next-action .action-body h4 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .next-action .action-body p  { font-size: 12px; color: var(--text-mid); margin-top: 3px; }
+    .next-action .action-btn {
+      margin-left: auto; flex-shrink: 0;
+      background: var(--teal); color: white;
+      border: none; border-radius: 20px; padding: 8px 14px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .next-action .action-btn:hover { background: var(--teal-light); }
+
+    /* ─────────────────────────────────────────────
+       SCREEN HEADER (inner)
+    ───────────────────────────────────────────── */
+    .inner-header {
+      padding: 52px 24px 20px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+    .inner-header .back {
+      font-size: 13px; color: var(--orange); font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; margin-bottom: 10px;
+    }
+    .inner-header h1 { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+    .inner-header p  { font-size: 13px; color: var(--text-mid); margin-top: 4px; }
+
+    /* ─────────────────────────────────────────────
+       PEER PROOF (on home)
+    ───────────────────────────────────────────── */
+    .peer-scroll {
+      display: flex; gap: 12px; padding: 0 20px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .peer-scroll::-webkit-scrollbar { display: none; }
+    .peer-card {
+      min-width: 220px; background: var(--white);
+      border-radius: var(--radius-md); padding: 16px;
+      box-shadow: var(--shadow-sm); border: 1.5px solid var(--border);
+      flex-shrink: 0; cursor: pointer; transition: all 0.22s;
+    }
+    .peer-card:hover { border-color: var(--orange); box-shadow: var(--shadow-md); }
+    .peer-top { display: flex; align-items: center; gap: 10px; }
+    .peer-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: white; flex-shrink: 0;
+    }
+    .peer-avatar.a1 { background: var(--teal); }
+    .peer-avatar.a2 { background: var(--orange); }
+    .peer-avatar.a3 { background: var(--success); }
+    .peer-card .peer-name { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+    .peer-card .peer-role { font-size: 11px; color: var(--text-light); }
+    .peer-card .peer-story { font-size: 12px; color: var(--text-mid); margin-top: 10px; line-height: 1.5; }
+    .peer-card .peer-earned {
+      margin-top: 12px; padding: 8px 12px;
+      background: var(--cream); border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .peer-card .peer-earned .earned-amt { font-size: 16px; font-weight: 800; color: var(--orange); }
+    .peer-card .peer-earned .earned-label { font-size: 10px; color: var(--text-light); }
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #E8F5E9; color: #2E7D32;
+      border-radius: 20px; padding: 2px 8px; font-size: 10px; font-weight: 700;
+    }
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE (desktop view)
+    ───────────────────────────────────────────── */
+    @media (min-width: 500px) {
+      .app-shell { box-shadow: 0 0 60px rgba(0,0,0,0.12); border-radius: 40px; margin: 24px auto; min-height: auto; }
+      .bottom-nav { border-radius: 0 0 40px 40px; }
+      .screen { min-height: calc(100vh - 48px); }
+    }
+
+    /* ─────────────────────────────────────────────
+       UTILITY
+    ───────────────────────────────────────────── */
+    .spacer { height: 20px; }
+    .mt-8  { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .tag {
+      display: inline-block;
+      background: var(--cream); color: var(--orange-dark);
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 11px; font-weight: 600;
+    }
+
+    /* Celebration overlay */
+    .celebrate-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+    }
+    .celebrate-overlay.open { display: flex; }
+    .celebrate-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .celebrate-box .celebrate-emoji { font-size: 64px; margin-bottom: 16px; }
+    .celebrate-box h2 { font-size: 26px; font-weight: 800; color: var(--text-dark); }
+    .celebrate-box .celebrate-amount { font-size: 42px; font-weight: 800; color: var(--orange); margin: 8px 0; }
+    .celebrate-box p { font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+    .celebrate-box .celebrate-close {
+      margin-top: 24px; width: 100%;
+      background: var(--teal); color: white;
+      border: none; border-radius: var(--radius-md);
+      padding: 14px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ─────────────────────────────────────────────
+       SCREENSHOT FAB
+    ───────────────────────────────────────────── */
+    .screenshot-fab {
+      position: fixed;
+      bottom: 96px; right: 20px;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--teal); color: white;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      box-shadow: var(--shadow-md);
+      font-size: 20px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 150;
+      transition: all 0.2s;
+    }
+    .screenshot-fab:hover {
+      transform: scale(1.1);
+      background: var(--teal-light);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 1: HOME / DASHBOARD
+  ══════════════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+
+    <div class="top-header">
+      <p class="greeting">Good evening, Priya 👋</p>
+      <h1>Let's keep<br><span>earning more</span></h1>
+      <div class="avatar">P</div>
+    </div>
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+      <div class="hero-text">
+        <p>Total ₹ Earned</p>
+        <div class="hero-amount"><span>₹</span>42,000</div>
+        <button class="hero-btn" onclick="openLogModal()">+ Log Earnings</button>
+      </div>
+      <div class="circular-progress">
+        <svg viewBox="0 0 72 72" width="72" height="72">
+          <circle class="ring-bg" cx="36" cy="36" r="30"/>
+          <circle class="ring-fill" cx="36" cy="36" r="30"
+            stroke-dasharray="188.5"
+            stroke-dashoffset="56.5"
+            id="hero-ring"/>
+        </svg>
+        <span class="pct" id="hero-pct">70%</span>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="section-label"><h2>Your Progress</h2><span></span></div>
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="stat-val orange">Day 28</div>
+        <div class="stat-label">Since signup</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val teal">Day 9 ✓</div>
+        <div class="stat-label">Milestone hit</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val green">3</div>
+        <div class="stat-label">Proposals sent</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val orange">₹50K</div>
+        <div class="stat-label">Target</div>
+      </div>
+    </div>
+
+    <!-- Next Action -->
+    <div class="section-label"><h2>Next Action</h2><span></span></div>
+    <div class="next-action">
+      <div class="action-icon">📤</div>
+      <div class="action-body">
+        <h4>Send follow-up to Client 2</h4>
+        <p>Your Day-14 script is ready · ~15 min</p>
+      </div>
+      <button class="action-btn" onclick="showToast('✓ Script copied to clipboard')">Do it</button>
+    </div>
+
+    <!-- Confidence Slider -->
+    <div class="confidence-card">
+      <div class="conf-header">
+        <div>
+          <h3>Confidence Slider</h3>
+          <p>Last updated today</p>
+        </div>
+        <div class="conf-val" id="conf-display">7</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" class="conf-slider" id="conf-slider" min="1" max="10" value="7" oninput="updateConf(this.value)" />
+        <div class="conf-labels">
+          <span>Won't work</span>
+          <span>Not sure</span>
+          <span>I'm doing this</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day Plan Cards -->
+    <div class="section-label">
+      <h2>Your Day-9 Plan</h2>
+      <a onclick="navigate('plan')">See all →</a>
+    </div>
+    <div class="card-grid">
+      <div class="day-card completed">
+        <div class="day-num">Day 1</div>
+        <h3>Update LinkedIn Profile</h3>
+        <p>Signal availability to market</p>
+        <span class="time-chip">20 min</span>
+      </div>
+      <div class="day-card completed">
+        <div class="day-num">Day 4</div>
+        <h3>Send First DMs</h3>
+        <p>Script provided, personalised</p>
+        <span class="time-chip">20 min</span>
+      </div>
+      <div class="day-card active-card">
+        <div class="day-num">Day 9 ✓</div>
+        <h3>Proposal Sent!</h3>
+        <p>AI Co-Pilot drafted & sent</p>
+        <span class="time-chip">Milestone ⭐</span>
+      </div>
+      <div class="day-card wide" onclick="navigate('plan')">
+        <div>
+          <div class="day-num">Days 10–30</div>
+          <h3>Extended Plan</h3>
+          <p>Negotiate → Contract → First ₹</p>
+        </div>
+        <div class="more-badge">View Plan</div>
+      </div>
+    </div>
+
+    <!-- Product Capabilities Link -->
+    <div class="section-label">
+      <h2>Product Capabilities</h2>
+      <a onclick="navigate('caps')">All 8 →</a>
+    </div>
+    <div style="padding:0 20px">
+      <div class="day-card wide" onclick="navigate('caps')" style="background:var(--white);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);cursor:pointer">
+        <div>
+          <div class="day-num" style="color:var(--orange)">MVP Infrastructure</div>
+          <h3 style="color:var(--text-dark)">Second Salary Core Specs</h3>
+          <p style="color:var(--text-mid)">The exact tools missing from your last attempt.</p>
+        </div>
+        <div class="more-badge" style="background:var(--teal)">Explore</div>
+      </div>
+    </div>
+
+    <!-- Peer Proof -->
+    <div class="section-label">
+      <h2>Peers Like You</h2>
+      <a onclick="navigate('journey')">Stories →</a>
+    </div>
+    <div class="peer-scroll">
+      <div class="peer-card">
+        <div class="peer-top">
+          <div class="peer-avatar a1">A</div>
+          <div>
+            <div class="peer-name">Ananya R.</div>
+            <div class="peer-role">Product Designer · Bangalore · 6y exp</div>
+          </div>
+        </div>
+        <div class="peer-story">"Burned by Upwork in 2023. Took 18 months off. Got here via LinkedIn DMs — exactly what the plan said."</div>
+        <div class="peer-earned">
+          <div>
+            <div class="earned-amt">₹38,000</div>
+            <div class="earned-label">in 26 days</div>
+          </div>
+          <span class="verified-badge">✓ Verified</span>
+        </div>
+      </div>
+      <div class="peer-card">
+        <div class="peer-top">
+          <div class="peer-avatar a2">K</div>
+          <div>
+            <div class="peer-name">Karthik M.</div>
+            <div class="peer-role">UI Designer · Bangalore · 8y exp</div>
+          </div>
+        </div>
+        <div class="peer-story">"Ghosted client, used the Crisis Flow script. Recovered ₹18,000. Still going."</div>
+        <div class="peer-earned">
+          <div>
+            <div class="earned-amt">₹55,000</div>
+            <div class="earned-label">in 42 days</div>
+          </div>
+          <span class="verified-badge">✓ Verified</span>
+        </div>
+      </div>
+      <div class="peer-card">
+        <div class="peer-top">
+          <div class="peer-avatar a3">S</div>
+          <div>
+            <div class="peer-name">Sneha T.</div>
+            <div class="peer-role">Senior Designer · Chennai · 7y exp</div>
+          </div>
+        </div>
+        <div class="peer-story">"Had zero confidence after 2 failed tries. Day-9 plan broke the paralysis loop."</div>
+        <div class="peer-earned">
+          <div>
+            <div class="earned-amt">₹27,500</div>
+            <div class="earned-label">in 31 days</div>
+          </div>
+          <span class="verified-badge">✓ Verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crisis Button -->
+    <div class="section-label"><h2>Need Help?</h2><span></span></div>
+    <div class="crisis-btn" onclick="openCrisisModal()">
+      <div class="crisis-icon">🚨</div>
+      <div class="crisis-text">
+        <h4>Something went wrong with a client</h4>
+        <p>Crisis flow → exact script in 90 seconds</p>
+      </div>
+      <div class="crisis-arrow">›</div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2: DAY-9 PLAN
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-plan">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>Your Day-9 Plan</h1>
+      <p>Senior Product Designer · 6h/week · Bangalore · ₹50K target</p>
+    </div>
+
+    <div class="section-label"><h2>9-Day Sprint</h2><a onclick="showToast('📄 PDF downloaded')">Download PDF</a></div>
+    <div class="cap-list" style="gap:10px">
+
+      <div class="day-card" style="background:var(--white);border:1.5px solid var(--success);border-radius:var(--radius-md);padding:16px" onclick="toggleDayDetail(this)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">✓</div>
+          <div style="flex:1">
+            <div class="day-num">Day 1 — Complete</div>
+            <h3 style="font-size:14px;margin-top:2px">Update LinkedIn headline + About</h3>
+            <p style="font-size:12px;color:var(--text-mid);margin-top:2px">20 min · LinkedIn</p>
+          </div>
+          <span style="color:var(--text-light);font-size:16px" class="expand-arrow">›</span>
+        </div>
+        <div class="day-detail" style="display:none;margin-top:12px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.6"><strong>Script provided:</strong> "Senior Product Designer open to consulting & freelance projects — fintech, consumer apps, design systems. DMs open." · Expected: 3–5 profile views in 24h.</p>
+        </div>
+      </div>
+
+      <div class="day-card" style="background:var(--white);border:1.5px solid var(--success);border-radius:var(--radius-md);padding:16px" onclick="toggleDayDetail(this)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">✓</div>
+          <div style="flex:1">
+            <div class="day-num">Day 2 — Complete</div>
+            <h3 style="font-size:14px;margin-top:2px">LinkedIn post: Design process</h3>
+            <p style="font-size:12px;color:var(--text-mid);margin-top:2px">25 min · LinkedIn</p>
+          </div>
+          <span style="color:var(--text-light);font-size:16px" class="expand-arrow">›</span>
+        </div>
+        <div class="day-detail" style="display:none;margin-top:12px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.6"><strong>Template:</strong> "I recently shipped an onboarding flow that reduced drop-off by 34%. Here's what made the difference…" · Signal visibility + professional credibility.</p>
+        </div>
+      </div>
+
+      <div class="day-card" style="background:var(--white);border:1.5px solid var(--success);border-radius:var(--radius-md);padding:16px" onclick="toggleDayDetail(this)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">✓</div>
+          <div style="flex:1">
+            <div class="day-num">Day 3 — Complete</div>
+            <h3 style="font-size:14px;margin-top:2px">Identify 5 target startups</h3>
+            <p style="font-size:12px;color:var(--text-mid);margin-top:2px">30 min · Research</p>
+          </div>
+          <span style="color:var(--text-light);font-size:16px" class="expand-arrow">›</span>
+        </div>
+        <div class="day-detail" style="display:none;margin-top:12px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.6"><strong>Criteria:</strong> Series A/B startups in Bangalore, hiring for product/UI in last 30 days. Find 5 hiring managers via LinkedIn. List their names, company, and hiring signal.</p>
+        </div>
+      </div>
+
+      <div class="day-card" style="background:var(--white);border:1.5px solid var(--success);border-radius:var(--radius-md);padding:16px" onclick="toggleDayDetail(this)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">✓</div>
+          <div style="flex:1">
+            <div class="day-num">Days 4–5 — Complete</div>
+            <h3 style="font-size:14px;margin-top:2px">Send DMs to all 5 prospects</h3>
+            <p style="font-size:12px;color:var(--text-mid);margin-top:2px">20 min · LinkedIn DM</p>
+          </div>
+          <span style="color:var(--text-light);font-size:16px" class="expand-arrow">›</span>
+        </div>
+        <div class="day-detail" style="display:none;margin-top:12px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.6"><strong>Script:</strong> "[Name], I noticed [Company] is building [feature]. I'm a senior product designer specialising in mobile-first flows — I've shipped [result]. Would a short conversation be useful?"</p>
+        </div>
+      </div>
+
+      <div class="day-card" style="background:var(--white);border:1.5px solid var(--orange);border-radius:var(--radius-md);padding:16px" onclick="toggleDayDetail(this)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--orange);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">5</div>
+          <div style="flex:1">
+            <div class="day-num" style="color:var(--orange)">Day 5 — Branch Point ⚡</div>
+            <h3 style="font-size:14px;margin-top:2px">Branch B: Add second channel</h3>
+            <p style="font-size:12px;color:var(--text-mid);margin-top:2px">25 min · Topmate</p>
+          </div>
+          <span style="color:var(--text-light);font-size:16px" class="expand-arrow">›</span>
+        </div>
+        <div class="day-detail" style="display:none;margin-top:12px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.6"><strong>Branch selected:</strong> No responses yet — normal. Adding Topmate as a second channel. Set up 30-min design review offering at ₹1,200/session. Creates inbound while outbound matures.</p>
+        </div>
+      </div>
+
+      <div class="day-card" style="background:var(--teal);border-radius:var(--radius-md);padding:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--orange);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">⭐</div>
+          <div style="flex:1">
+            <div class="day-num" style="color:var(--orange-light)">Day 9 — MILESTONE</div>
+            <h3 style="font-size:14px;margin-top:2px;color:white">First Proposal Sent 🎉</h3>
+            <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">AI Co-Pilot drafted · LinkedIn email</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 3: CAPABILITIES
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-caps">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>8 Capabilities</h1>
+      <p>The infrastructure that was missing last time</p>
+    </div>
+
+    <div class="section-label"><h2>MVP Features</h2><span></span></div>
+    <div class="cap-list">
+
+      <div class="cap-item" onclick="showToast('Intake & Personalisation — MUST HAVE')">
+        <div class="cap-icon c1">📋</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 1</div>
+          <h3>Intake & Personalisation</h3>
+          <p>10-min structured form. 40-skill taxonomy. Profile object that powers every downstream decision.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('Day-9 Plan — MUST HAVE')">
+        <div class="cap-icon c2">📅</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 2</div>
+          <h3>The Day-9 Plan</h3>
+          <p>Personalised day-by-day plan. One action per day, exact script, adaptive branch at Day 5.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('AI Co-Pilot — MUST HAVE')">
+        <div class="cap-icon c3">🤖</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 3</div>
+          <h3>AI Co-Pilot</h3>
+          <p>Proposal generator · Contract builder · Pricing calculator. Channel-aware, protective defaults.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('Peer Proof Gallery — MUST HAVE')">
+        <div class="cap-icon c4">👥</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 4</div>
+          <h3>Peer Proof Gallery</h3>
+          <p>Exact-profile matching. Contextual surfacing at moments of doubt. Verified story badges.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('₹ Earned Dashboard — MUST HAVE · RICE 20.0')">
+        <div class="cap-icon c5">₹</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 5</div>
+          <h3>₹ Earned Dashboard</h3>
+          <p>Hero metric: ₹ earned only. Self-report logging. Milestone celebrations. Confidence slider.</p>
+          <span class="cap-tag must">MUST HAVE · RICE 20.0</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('Async Peer Cohorts — MUST HAVE')">
+        <div class="cap-icon c6">💬</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 6</div>
+          <h3>Async Peer Cohorts</h3>
+          <p>5-person auto-assigned. Slack/Discord. Structured prompts at Days 1,5,9,14,21,30. 30-day lifespan.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('Crisis Flow — MUST HAVE (promoted)')">
+        <div class="cap-icon c7">🚨</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 7</div>
+          <h3>Self-Serve Crisis Flow</h3>
+          <p>Triage → response template → cohort routing → path adaptation. One bad client = recoverable event.</p>
+          <span class="cap-tag must">MUST HAVE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+      <div class="cap-item" onclick="showToast('Channel Targeter — Infrastructure')">
+        <div class="cap-icon c8">🎯</div>
+        <div class="cap-body">
+          <div class="cap-num">Capability 8</div>
+          <h3>Channel Targeter</h3>
+          <p>Tier 1: LinkedIn, Upwork+. Tier 2: skill-specific. Tier 3: Fiverr (guarded). Tier 0: excluded. Protection wrap on every rec.</p>
+          <span class="cap-tag should">INFRASTRUCTURE</span>
+        </div>
+        <div class="cap-arrow">›</div>
+      </div>
+
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 4: METRICS
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-metrics">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>Success Metrics</h1>
+      <p>If it doesn't track ₹ earned, it doesn't matter</p>
+    </div>
+
+    <!-- Metrics Hero -->
+    <div class="metrics-hero">
+      <p>North Star — ₹10K Completion Rate</p>
+      <div class="big-num"><span>₹</span>10,000 <span style="font-size:16px;color:rgba(255,255,255,0.6)">in 90 days</span></div>
+      <div class="target-row">
+        <span class="target-label">Target</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:70%"></div></div>
+        <span class="target-pct">≥20%</span>
+      </div>
+    </div>
+
+    <!-- Primary Metrics -->
+    <div class="section-label"><h2>Primary — Existential</h2><span></span></div>
+    <div class="metric-cards">
+
+      <div class="metric-card">
+        <div class="metric-dot primary"></div>
+        <div class="metric-body">
+          <div class="metric-name">Day-9 Activation Rate</div>
+          <div class="metric-def">% of signups who send a real proposal by Day 9</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val">50%+</div>
+          <span class="target-unit">target</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-dot primary"></div>
+        <div class="metric-body">
+          <div class="metric-name">First ₹ Rate</div>
+          <div class="metric-def">% of Day-9-activated users who log first ₹ within 30 days</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val">40%+</div>
+          <span class="target-unit">target</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-dot primary"></div>
+        <div class="metric-body">
+          <div class="metric-name">₹10K Completion Rate</div>
+          <div class="metric-def">% reaching ₹10K verified within 90 days of signup</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val">20%+</div>
+          <span class="target-unit">at 90 days</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary -->
+    <div class="section-label"><h2>Secondary — Capability Health</h2><span></span></div>
+    <div class="metric-cards">
+
+      <div class="metric-card">
+        <div class="metric-dot secondary"></div>
+        <div class="metric-body">
+          <div class="metric-name">AI Co-Pilot Send Rate</div>
+          <div class="metric-def">% of generated proposals the user actually sends</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val" style="color:var(--teal)">60%+</div>
+          <span class="target-unit">validates A1</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-dot secondary"></div>
+        <div class="metric-body">
+          <div class="metric-name">Cohort Participation Rate</div>
+          <div class="metric-def">% of cohort members posting at least once per week</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val" style="color:var(--teal)">60%+</div>
+          <span class="target-unit">validates A2</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-dot secondary"></div>
+        <div class="metric-body">
+          <div class="metric-name">Crisis Recovery Rate</div>
+          <div class="metric-def">% of crisis-affected users who log ₹ earned within 60 days</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val" style="color:var(--teal)">50%+</div>
+          <span class="target-unit">target</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-dot secondary"></div>
+        <div class="metric-body">
+          <div class="metric-name">Peer Gallery Engagement</div>
+          <div class="metric-def">% clicking a peer story when surfaced contextually</div>
+        </div>
+        <div class="metric-target">
+          <div class="target-val" style="color:var(--teal)">40%+</div>
+          <span class="target-unit">target</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anti Metrics -->
+    <div class="section-label"><h2>Anti-Metrics 🚫</h2><span></span></div>
+    <div style="padding:0 20px">
+      <div style="background:var(--white);border-radius:var(--radius-md);padding:16px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm)">
+        <p style="font-size:13px;color:var(--text-mid);line-height:1.8">
+          We <strong>do not</strong> optimise for:<br>
+          ❌ Time in product / sessions per week<br>
+          ❌ Content consumed or lessons watched<br>
+          ❌ Streaks or daily engagement gamification<br>
+          ❌ Module completion rate (no modules exist)<br>
+          ❌ Social shares unprompted<br>
+          ❌ Estimated future earnings projections
+        </p>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 5: RISKS / JOURNEYS
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-journey">
+    <div class="inner-header">
+      <div class="back" onclick="navigate('home')">← Back</div>
+      <h1>Risks & Journeys</h1>
+      <p>What we're betting on — and how we protect the bet</p>
+    </div>
+
+    <!-- Journey Tabs -->
+    <div class="section-label"><h2>User Journeys</h2><span></span></div>
+    <div class="journey-tabs">
+      <div class="journey-tab active" onclick="switchJourney(this, 'j1')">Signup → Day 9</div>
+      <div class="journey-tab" onclick="switchJourney(this, 'j2')">Day 1–9 Plan</div>
+      <div class="journey-tab" onclick="switchJourney(this, 'j3')">First ₹</div>
+      <div class="journey-tab" onclick="switchJourney(this, 'j4')">Crisis</div>
+    </div>
+
+    <div class="journey-content">
+
+      <!-- Journey 1 -->
+      <div class="journey-panel active" id="j1">
+        <div class="journey-timeline">
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">1</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 0</div>
+              <h3>Priya finds Second Salary</h3>
+              <p>LinkedIn peer story → landing page with real earnings (no projections) → "See if it's right for you"</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">2</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 0 · 10 min</div>
+              <h3>Intake completes</h3>
+              <p>Skill: Product Design · 5–10y exp · 6h/wk · Upwork-burned · Balanced risk</p>
+              <div class="timeline-card">Profile object generated. Powers every downstream decision.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot orange-dot">3</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 0 → immediately</div>
+              <h3>Day-9 Plan generated</h3>
+              <p>9 personalised day-cards. Day 1 active. Days 2–9 visible but muted. AI Co-Pilot locked.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">4</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 1 · 20 min</div>
+              <h3>First action taken</h3>
+              <p>LinkedIn headline updated using exact script. Marked complete. Product unlocks.</p>
+              <div class="timeline-card">Co-Pilot, cohort, and peer gallery now accessible. One peer story shown: Ananya, same profile.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journey 2 -->
+      <div class="journey-panel" id="j2">
+        <div class="journey-timeline">
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">D2</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 2</div>
+              <h3>LinkedIn post published</h3>
+              <p>Template provided. Priya edits one line. Posts. Visibility signal building.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">D5</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 5 — Branch Point</div>
+              <h3>No responses → Branch B</h3>
+              <p>Plan adapts. Add Topmate as second channel. Cohort prompt fires: "What's stuck?" Two members respond.</p>
+              <div class="timeline-card">Priya doesn't feel alone. Doesn't exit. Continues.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot orange-dot">D7</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 7</div>
+              <h3>Discovery call happens</h3>
+              <p>One DM responds. 30-min call. Call script and rate-quoting guide used. Prospect asks for a proposal.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">D9</div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 9 — Milestone ⭐</div>
+              <h3>Proposal sent via Co-Pilot</h3>
+              <p>Gig described → 2 clarifying questions → proposal generated → Priya edits → sends. Celebration triggered.</p>
+              <div class="timeline-card">3 peer stories surface: "Here's who else did this in their first 9 days."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journey 3 -->
+      <div class="journey-panel" id="j3">
+        <div class="journey-timeline">
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">10</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 10–12</div>
+              <h3>Counter-offer negotiation</h3>
+              <p>Client counters at ₹38K. Co-Pilot generates: "At ₹38K → 1 revision. At ₹42K → 2 revisions + check-in." Client accepts ₹42K.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">12</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 12</div>
+              <h3>Contract generated & signed</h3>
+              <p>Scope clause. 2-revision limit. 50% upfront / 50% on delivery. Kill fee 30%. First contract since 2022.</p>
+              <div class="timeline-card">Priya has documentation. Scope creep has a response now.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot orange-dot">20</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 20</div>
+              <h3>Scope-change handled</h3>
+              <p>Client asks for "one small addition." Script: "Happy to include it — ₹7,000 additional. Shall I add to invoice?" Client accepts.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">28</div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 28 🎉</div>
+              <h3>First ₹ logged</h3>
+              <p>₹42,000 arrives. Priya logs in 3 taps. Full-screen celebration. Confidence slider: 3 → 8. Story submission prompt.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journey 4 -->
+      <div class="journey-panel" id="j4">
+        <div class="journey-timeline">
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot" style="background:var(--danger)">!</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 19</div>
+              <h3>Client goes quiet</h3>
+              <p>No response. WhatsApp, email, LinkedIn all silent. ₹21,000 outstanding. Priya spiralling.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot">T</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 19 · 90 seconds</div>
+              <h3>Crisis triage</h3>
+              <p>Issue: Ghosted. Stakes: ₹21K. Channel: LinkedIn direct. Timeline: 3 days. Relationship: one-time.</p>
+              <div class="timeline-card">Response: 3-message payment chaser sequence. Polite → Firm → Final.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot orange-dot">C</div><div class="timeline-line"></div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 19 — cohort routing</div>
+              <h3>Shared anonymously with cohort</h3>
+              <p>Two members respond within 6 hours. One recovered ₹15K in a similar situation. Priya does not exit.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-left"><div class="timeline-dot" style="background:var(--success)">✓</div></div>
+            <div class="timeline-body">
+              <div class="t-label">Day 23</div>
+              <h3>Recovery + path adapted</h3>
+              <p>Client responds. Pays. Next contract defaults to 70% upfront. Channel Targeter notes risk. Karthik's story surfaced.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risks -->
+    <div class="section-label" style="margin-top:20px"><h2>Key Risks</h2><span></span></div>
+    <div class="risk-cards">
+      <div class="risk-card existential" onclick="this.classList.toggle('open')">
+        <div class="risk-header">
+          <h3>R1 — AI output not good enough to send</h3>
+          <span class="risk-badge existential">Existential</span>
+        </div>
+        <div class="risk-body">If users don't trust Co-Pilot drafts enough to send them, the Day-9 milestone collapses and the entire activation model fails.</div>
+        <div class="risk-mitigation">
+          <strong>Mitigation:</strong> Wizard-of-oz test pre-build with 10–15 users. Hard quality gate: Co-Pilot Send Rate ≥ 40% before public launch. Tone variants + "explain why" function build trust.
+        </div>
+        <div class="risk-footer">
+          <span>Discovery: A1 assumption · P-04</span>
+          <span class="risk-arrow">▾</span>
+        </div>
+      </div>
+
+      <div class="risk-card existential" onclick="this.classList.toggle('open')">
+        <div class="risk-header">
+          <h3>R2 — Async cohorts don't replicate coach accountability</h3>
+          <span class="risk-badge existential">Existential</span>
+        </div>
+        <div class="risk-body">5-person Slack cohorts may generate low participation, feel hollow, and fail to carry the accountability load a coach would have provided.</div>
+        <div class="risk-mitigation">
+          <strong>Mitigation:</strong> Structured prompts are non-negotiable. 7-day silence detection → team intervention. Cohort Participation Rate ≥ 40% gate. Quantitative correlation test at Day 60.
+        </div>
+        <div class="risk-footer">
+          <span>Discovery: A2 assumption · Theme 6 · H8</span>
+          <span class="risk-arrow">▾</span>
+        </div>
+      </div>
+
+      <div class="risk-card medium" onclick="this.classList.toggle('open')">
+        <div class="risk-header">
+          <h3>R3 — Content lock drives exits not action</h3>
+          <span class="risk-badge medium">High</span>
+        </div>
+        <div class="risk-body">Locking Co-Pilot and community behind Day-1 action is perceived as coercive, not enabling. Users who want to explore first may leave.</div>
+        <div class="risk-mitigation">
+          <strong>Mitigation:</strong> Copy tone is critical — "unlock" not "locked out." Preview one peer story pre-Day-1. Show exactly what unlocks. Monitor Day-1 Action Rate from day one of beta.
+        </div>
+        <div class="risk-footer">
+          <span>Discovery: A4 assumption · P-21, P-24</span>
+          <span class="risk-arrow">▾</span>
+        </div>
+      </div>
+
+      <div class="risk-card medium" onclick="this.classList.toggle('open')">
+        <div class="risk-header">
+          <h3>R4 — Peer Gallery empty at launch</h3>
+          <span class="risk-badge high">High</span>
+        </div>
+        <div class="risk-body">The gallery that does the trust work is empty at launch. Users see a blank gallery and conclude the product is unproven.</div>
+        <div class="risk-mitigation">
+          <strong>Mitigation:</strong> 20–30 beta users recruited 60–90 days before public launch. Seed gallery with their verified stories. Transparent "Early user" label. Target ≥5 verified stories at launch.
+        </div>
+        <div class="risk-footer">
+          <span>Discovery: Cold start · P-20 · P-26</span>
+          <span class="risk-arrow">▾</span>
+        </div>
+      </div>
+
+      <div class="risk-card low" onclick="this.classList.toggle('open')">
+        <div class="risk-header">
+          <h3>R5 — User stalls at Day 5 with no responses</h3>
+          <span class="risk-badge low">Medium</span>
+        </div>
+        <div class="risk-body">The Day-5 branch logic detects a stall, but the user doesn't trust the reoriented plan enough to continue. Confidence drops.</div>
+        <div class="risk-mitigation">
+          <strong>Mitigation:</strong> Day-4 card explicitly sets expectations ("normal to have no responses"). Branch B must feel like a real pivot. Cohort prompt surfaces peer stories. 48h nudge email fires.
+        </div>
+        <div class="risk-footer">
+          <span>Discovery: P-22 dropout pattern · Day-9 cliff</span>
+          <span class="risk-arrow">▾</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       BOTTOM NAVIGATION
+  ══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navigate('home')">
+      <div class="nav-icon">⊞</div>
+      <div class="nav-label">Home</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-plan" onclick="navigate('plan')">
+      <div class="nav-icon">📅</div>
+      <div class="nav-label">Day Plan</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-plus" onclick="openLogModal()" title="Log Earnings">＋</div>
+    <div class="nav-item" id="nav-metrics" onclick="navigate('metrics')">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Metrics</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-journey" onclick="navigate('journey')">
+      <div class="nav-icon">🗺</div>
+      <div class="nav-label">Risks</div>
+      <div class="nav-dot"></div>
+    </div>
+  </nav>
+
+  <!-- Floating Screenshot Capture Button -->
+  <button id="screenshot-fab" class="screenshot-fab" onclick="captureScreen()" title="Download Crisp Screenshot">📸</button>
+
+</div><!-- end app-shell -->
+
+<!-- ══════════════════════════════════════════
+     MODAL: LOG EARNINGS
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="log-modal" onclick="handleModalClick(event, 'log-modal')">
+  <div class="modal-sheet" style="position:relative">
+    <span class="modal-close" onclick="closeModal('log-modal')">✕</span>
+    <div class="modal-handle"></div>
+    <h2>Log Earnings</h2>
+    <p>Self-report in under 60 seconds. Invoice upload = Verified badge.</p>
+    <div class="form-field">
+      <label>Amount (₹)</label>
+      <input type="number" id="earn-amount" placeholder="e.g. 42000" />
+    </div>
+    <div class="form-field">
+      <label>Channel</label>
+      <select id="earn-channel">
+        <option value="">Select channel</option>
+        <option>LinkedIn</option>
+        <option>Upwork</option>
+        <option>Topmate</option>
+        <option>Direct / Referral</option>
+        <option>Fiverr</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Client name (optional — anonymised)</label>
+      <input type="text" placeholder="e.g. Startup Co." />
+    </div>
+    <button class="modal-btn" onclick="logEarnings()">₹ Log Earnings</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: CRISIS TRIAGE
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="crisis-modal" onclick="handleModalClick(event, 'crisis-modal')">
+  <div class="modal-sheet" style="position:relative">
+    <span class="modal-close" onclick="closeModal('crisis-modal')">✕</span>
+    <div class="modal-handle"></div>
+    <h2>Crisis Triage 🚨</h2>
+    <p>90 seconds. Exact script. You don't have to figure this out alone.</p>
+    <div class="form-field">
+      <label>What happened?</label>
+      <select id="crisis-type">
+        <option value="">Select situation</option>
+        <option>Ghosted after delivery</option>
+        <option>Scope creep without pay</option>
+        <option>Late / non-payment</option>
+        <option>Unfair feedback</option>
+        <option>Quality dispute</option>
+        <option>Harassment</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>₹ at stake</label>
+      <input type="number" placeholder="e.g. 21000" />
+    </div>
+    <div class="form-field">
+      <label>Platform / channel</label>
+      <select>
+        <option value="">Select platform</option>
+        <option>LinkedIn / Direct</option>
+        <option>Upwork</option>
+        <option>Fiverr</option>
+        <option>Topmate</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <button class="modal-btn" style="background:var(--danger);box-shadow:0 6px 20px rgba(224,90,90,0.35)" onclick="generateCrisisScript()">Get My Script →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CELEBRATION OVERLAY
+══════════════════════════════════════════ -->
+<div class="celebrate-overlay" id="celebrate">
+  <div class="celebrate-box">
+    <div class="celebrate-emoji">🎉</div>
+    <h2>You earned it.</h2>
+    <div class="celebrate-amount" id="celebrate-amount">₹42,000</div>
+    <p>That's real money from your skill. This is what Second Salary is for.</p>
+    <button class="celebrate-close" onclick="closeCelebrate()">Share My Story →</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- html2canvas library for high-res crisp screenshots -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+  // ── Navigation ──────────────────────────────────────────
+  const screens = { home: 'screen-home', plan: 'screen-plan', caps: 'screen-caps', metrics: 'screen-metrics', journey: 'screen-journey' };
+  const navIds  = { home: 'nav-home', plan: 'nav-plan', metrics: 'nav-metrics', journey: 'nav-journey' };
+
+  function navigate(key) {
+    Object.values(screens).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    });
+    Object.values(navIds).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    });
+    const target = document.getElementById(screens[key]);
+    if (target) { target.classList.add('active'); target.scrollTop = 0; window.scrollTo(0,0); }
+    if (navIds[key]) document.getElementById(navIds[key]).classList.add('active');
+  }
+
+  // ── Modals ───────────────────────────────────────────────
+  function openLogModal()    { document.getElementById('log-modal').classList.add('open'); }
+  function openCrisisModal() { document.getElementById('crisis-modal').classList.add('open'); }
+  function closeModal(id)    { document.getElementById(id).classList.remove('open'); }
+  function handleModalClick(e, id) {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  }
+
+  // ── Log Earnings ─────────────────────────────────────────
+  function logEarnings() {
+    const amt = document.getElementById('earn-amount').value;
+    if (!amt) { showToast('Enter an amount first'); return; }
+    closeModal('log-modal');
+    document.getElementById('celebrate-amount').textContent = '₹' + parseInt(amt).toLocaleString('en-IN');
+    document.getElementById('celebrate').classList.add('open');
+    // Update hero
+    document.getElementById('hero-pct').textContent = '84%';
+    document.getElementById('hero-ring').setAttribute('stroke-dashoffset', '30');
+    document.getElementById('earn-amount').value = '';
+  }
+  function closeCelebrate() {
+    document.getElementById('celebrate').classList.remove('open');
+    showToast('🌟 Earnings logged successfully');
+  }
+
+  // ── Crisis Script ─────────────────────────────────────────
+  function generateCrisisScript() {
+    const type = document.getElementById('crisis-type').value;
+    if (!type) { showToast('Select a situation type first'); return; }
+    closeModal('crisis-modal');
+    showToast('📋 3-message script copied to clipboard');
+  }
+
+  // ── Toast ────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Confidence Slider ────────────────────────────────────
+  function updateConf(v) {
+    document.getElementById('conf-display').textContent = v;
+    const pct = ((v - 1) / 9) * 100;
+    document.getElementById('conf-slider').style.background =
+      `linear-gradient(to right, var(--orange) 0%, var(--orange) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
+    showToast(`Confidence updated to ${v}/10`);
+  }
+
+  // ── Day Detail Toggle ────────────────────────────────────
+  function toggleDayDetail(card) {
+    const detail = card.querySelector('.day-detail');
+    const arrow  = card.querySelector('.expand-arrow');
+    if (!detail) return;
+    const open = detail.style.display !== 'none' && detail.style.display !== '';
+    detail.style.display = open ? 'none' : 'block';
+    if (arrow) arrow.textContent = open ? '›' : '˅';
+  }
+
+  // ── Journey Tabs ─────────────────────────────────────────
+  function switchJourney(tab, panelId) {
+    document.querySelectorAll('.journey-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.journey-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  // ── Animate ring on load ─────────────────────────────────
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const ring = document.getElementById('hero-ring');
+      if (ring) ring.style.strokeDashoffset = '56.5';
+    }, 300);
+  });
+
+  // ── Caps: navigate from home section-label ───────────────
+  // The "See all" link on Day Plan section navigates to caps
+  document.querySelectorAll('.section-label a').forEach(a => {
+    if (a.textContent.includes('All 8')) {
+      a.onclick = () => navigate('caps');
+    }
+  });
+
+  // ── Query Parameters Navigation ──────────────────────────
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    const screenParam = params.get('screen');
+    if (screenParam && screens[screenParam]) {
+      navigate(screenParam);
+    }
+  });
+
+  // ── Pixel-Perfect Screenshots Capture ────────────────────
+  function captureScreen() {
+    if (typeof html2canvas === 'undefined') {
+      showToast('⚠️ Screenshot helper loading. Connect to internet or use Win+Shift+S.');
+      return;
+    }
+    
+    const fab = document.getElementById('screenshot-fab');
+    const nav = document.querySelector('.bottom-nav');
+    
+    if (fab) fab.style.display = 'none';
+    
+    // Temporarily switch fixed navigation element to absolute relative to .app-shell
+    // so html2canvas renders it perfectly at the bottom of the capture canvas
+    const originalNavStyle = nav.style.cssText;
+    nav.style.position = 'absolute';
+    nav.style.bottom = '0';
+    nav.style.left = '0';
+    nav.style.transform = 'none';
+    nav.style.width = '100%';
+    
+    showToast('📸 Capturing pixel-perfect screen...');
+    
+    setTimeout(() => {
+      html2canvas(document.querySelector('.app-shell'), {
+        scale: 3, // Super high-res, ultra-crisp
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#F7F8FA',
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 430,
+        windowHeight: document.querySelector('.app-shell').offsetHeight
+      }).then(canvas => {
+        const link = document.createElement('a');
+        const activeScreen = Object.keys(screens).find(key => 
+          document.getElementById(screens[key]).classList.contains('active')
+        ) || 'screen';
+        
+        link.download = `second_salary_${activeScreen}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Restore elements
+        if (fab) fab.style.display = 'flex';
+        nav.style.cssText = originalNavStyle;
+        showToast('✓ High-res screenshot downloaded!');
+      }).catch(err => {
+        console.error(err);
+        if (fab) fab.style.display = 'flex';
+        nav.style.cssText = originalNavStyle;
+        showToast('❌ Capture failed. Try standard screen capture.');
+      });
+    }, 500);
+  }
+</script>
+</body>
+</html>
