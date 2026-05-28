@@ -32,7 +32,7 @@ export default function App() {
 
   // Listen for Supabase auth state changes
   useEffect(() => {
-    const COPILOT_WEBHOOKS = ['router', 'path1', 'path_1'];
+    const COPILOT_WEBHOOKS = ['router', 'path_1'];
 
     const navigateAfterLogin = async (user) => {
       const { data } = await supabase
@@ -46,7 +46,7 @@ export default function App() {
 
       if (showCopilot) {
         // For path_1 users, check if their session is already complete
-        if (webhook === 'path_1' || webhook === 'path1') {
+        if (webhook === 'path_1') {
           const { data: sessionData } = await supabase
             .from('sessions')
             .select('session_complete')
@@ -63,7 +63,7 @@ export default function App() {
           }
         }
 
-        const mappedWebhook = webhook === 'path_1' || webhook === 'path1' ? 'path1' : 'router';
+        const mappedWebhook = webhook === 'path_1' ? 'path_1' : 'router';
         setInitialWebhook(mappedWebhook);
         setActiveScreen('screen-copilot');
         setActiveNav('copilot');

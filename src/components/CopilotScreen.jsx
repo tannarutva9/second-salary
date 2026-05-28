@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { callWebhook } from '../supabaseClient';
 
-const HANDOFF_WEBHOOK_MAP = { path_1: 'path1' };
+const HANDOFF_WEBHOOK_MAP = { path_1: 'path_1' };
 
 function parseAssistantMessage(raw) {
   const withoutExtract = raw.replace(/<EXTRACT>[\s\S]*?<\/EXTRACT>/g, '').trim();
