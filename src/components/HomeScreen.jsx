@@ -90,7 +90,7 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
   );
 }
 
-export default function HomeScreen({ onOpenLog, user }) {
+export default function HomeScreen({ onOpenLog, user, onOpenCopilot }) {
   const [dashData, setDashData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -229,10 +229,14 @@ export default function HomeScreen({ onOpenLog, user }) {
           <div className="next-action">
             <div className="icon"><Send size={20} /></div>
             <div className="body">
-              <h4>{nextTask.title}{recipient ? ` — ${recipient}` : ''}</h4>
+              <h4>
+                {nextTask.day_number === 1 && recipient
+                  ? `Send pitch to ${recipient}${serviceCard?.service_name ? ` — ${serviceCard.service_name}` : ''}`
+                  : `${nextTask.title}${recipient ? ` — ${recipient}` : ''}`}
+              </h4>
               <p>Day {nextTask.day_number} task</p>
             </div>
-            <button className="btn">Do it</button>
+            <button className="btn" onClick={onOpenCopilot}>Do it</button>
           </div>
         </>
       )}

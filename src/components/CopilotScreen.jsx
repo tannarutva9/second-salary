@@ -228,13 +228,21 @@ function MessageText({ text }) {
 export default function CopilotScreen({
   showToast, user,
   initialWebhook = 'router',
+  mode = 'onboarding',
+  copilotContext = null,
   setAgentStage, setAgentHandoff, setSessionComplete,
   setPersona, setPathAssigned,
   onSessionComplete,
 }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }
-  ]);
+  const returnGreeting = mode === 'return' && copilotContext
+    ? `Welcome back! It's Day ${copilotContext.dayNumber}. ${(copilotContext.returnQuestion || '').replace('[recipient]', copilotContext.recipient || '')}`
+    : null;
+
+  const [messages, setMessages] = useState(
+    returnGreeting
+      ? [{ role: 'assistant', text: returnGreeting }]
+      : [{ role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }]
+  );
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeWebhook, setActiveWebhook] = useState(initialWebhook);
@@ -256,11 +264,22 @@ export default function CopilotScreen({
     const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
     const firstName = fullName.split(' ')[0];
 
-    const response = await callWebhook({
-      user_id: user?.id,
-      message: text,
-      first_name: firstName,
-    }, activeWebhook);
+    const payload = mode === 'return'
+      ? {
+          event: 'daily_return',
+          day_number: copilotContext?.dayNumber,
+          user_id: user?.id,
+          email: user?.email,
+          message: text,
+          recipient: copilotContext?.recipient,
+        }
+      : {
+          user_id: user?.id,
+          message: text,
+          first_name: firstName,
+        };
+
+    const response = await callWebhook(payload, activeWebhook);
 
     // Router format: { message, stage, handoff, session_complete }
     // Path1 format: full session record with messages as a JSON string
