@@ -47,8 +47,10 @@ export default function App() {
     const { data: taskData } = await supabase
       .from('daily_tasks')
       .select('return_question')
+      .eq('path', 'path_1')
+      .is('branch_type', null)
       .eq('day_number', dayNumber)
-      .single();
+      .maybeSingle();
     setCopilotMode('return');
     setCopilotContext({
       dayNumber,
@@ -93,8 +95,10 @@ export default function App() {
             const { data: taskData } = await supabase
               .from('daily_tasks')
               .select('return_question')
+              .eq('path', 'path_1')
+              .is('branch_type', null)
               .eq('day_number', dayNumber)
-              .single();
+              .maybeSingle();
             setCopilotMode('return');
             setCopilotContext({
               dayNumber,
