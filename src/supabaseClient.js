@@ -18,7 +18,8 @@ export async function callWebhook(eventPayload, type = 'router') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(eventPayload),
     });
-    const data = await res.json();
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
     console.log(`[Webhook Response | ${type}]`, data);
     return data;
   } catch (err) {

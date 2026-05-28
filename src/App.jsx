@@ -1,123 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, Calendar, Plus, BarChart2, User, Send, CheckCircle2, Zap, Users, TrendingUp } from 'lucide-react';
+import { LayoutGrid, Calendar, Plus, BarChart2, User } from 'lucide-react';
 import './index.css';
 
 import { supabase, callWebhook } from './supabaseClient';
 import AuthScreen from './components/AuthScreen';
+import HomeScreen from './components/HomeScreen';
 import CopilotScreen from './components/CopilotScreen';
 import CohortScreen from './components/CohortScreen';
 import ProfileScreen from './components/ProfileScreen';
-
-function HomeScreen({ onOpenLog, user }) {
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
-  return (
-    <>
-      <div className="top-header">
-        <div className="avatar">{displayName[0]?.toUpperCase()}</div>
-        <div className="greeting">{greeting}, {displayName} 👋</div>
-        <h1>Let's keep <span>earning more</span></h1>
-      </div>
-
-      <div className="hero-card">
-        <div className="hero-text">
-          <p>Total ₹ Earned</p>
-          <div className="hero-amount">₹42,000</div>
-          <button className="hero-btn" onClick={onOpenLog}>Log Earnings</button>
-        </div>
-        <div className="circular-progress">
-          <svg viewBox="0 0 100 100">
-            <circle className="ring-bg" cx="50" cy="50" r="40" />
-            <circle className="ring-fill" cx="50" cy="50" r="40" />
-          </svg>
-          <div className="pct">70%</div>
-        </div>
-      </div>
-
-      <div className="stat-row">
-        <div className="stat-pill">
-          <span className="val orange">Day 28</span>
-          <span className="label">Day</span>
-        </div>
-        <div className="stat-pill">
-          <span className="val teal">Day 9 ✓</span>
-          <span className="label">Plan</span>
-        </div>
-        <div className="stat-pill">
-          <span className="val green">3</span>
-          <span className="label">Months</span>
-        </div>
-        <div className="stat-pill">
-          <span className="val orange">₹50K</span>
-          <span className="label">Goal</span>
-        </div>
-      </div>
-
-      <h2 className="section-title">Next Action</h2>
-      <div className="next-action">
-        <div className="icon"><Send size={20} /></div>
-        <div className="body">
-          <h4>Send follow-up to Client 2</h4>
-          <p>Your Day-14 script is ready • ~15 min</p>
-        </div>
-        <button className="btn">Do it</button>
-      </div>
-
-      <div className="confidence-card">
-        <div className="header">
-          <h4>Confidence Level</h4>
-          <span className="val">7 / 10</span>
-        </div>
-        <div className="slider-track">
-          <div className="slider-fill"></div>
-          <div className="slider-thumb"></div>
-        </div>
-      </div>
-
-      {/* Quick Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', margin: '20px 0' }}>
-        <div style={{ background: 'var(--white)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', boxShadow: 'var(--shadow)' }}>
-          <Zap size={20} style={{ color: 'var(--orange)', marginBottom: '8px' }} />
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)' }}>12</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-mid)' }}>DMs Sent</div>
-        </div>
-        <div style={{ background: 'var(--white)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', boxShadow: 'var(--shadow)' }}>
-          <Users size={20} style={{ color: 'var(--teal)', marginBottom: '8px' }} />
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)' }}>3</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-mid)' }}>Prospects</div>
-        </div>
-        <div style={{ background: 'var(--white)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', boxShadow: 'var(--shadow)' }}>
-          <TrendingUp size={20} style={{ color: '#22C55E', marginBottom: '8px' }} />
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)' }}>1</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-mid)' }}>Proposals</div>
-        </div>
-      </div>
-
-      <h2 className="section-title">Your Day-9 Plan</h2>
-      <div className="plan-grid">
-        <div className="plan-card cream">
-          <h4><CheckCircle2 size={16} /> Day 1 Complete</h4>
-          <p>- Update LinkedIn<br />Profile - 20 min</p>
-        </div>
-        <div className="plan-card teal">
-          <h4>Day 9 ✓ <span className="milestone-badge">MILESTONE</span></h4>
-          <p>- Proposal Sent! - ⭐</p>
-        </div>
-        <div className="plan-card cream">
-          <h4><CheckCircle2 size={16} /> Day 4 Complete</h4>
-          <p>- Send First DMs<br />- 20 min</p>
-        </div>
-        <div className="plan-card teal">
-          <h4>Days 10-30</h4>
-          <p>Extended Plan</p>
-          <button className="btn-outline">View Plan</button>
-        </div>
-      </div>
-    </>
-  );
-}
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState('screen-login');
@@ -128,39 +18,77 @@ export default function App() {
   const [showReminder, setShowReminder] = useState(false);
   const [user, setUser] = useState(null);
   const [logAmount, setLogAmount] = useState('');
+  const [agentStage, setAgentStage] = useState(null);
+  const [agentHandoff, setAgentHandoff] = useState(null);
+  const [sessionComplete, setSessionComplete] = useState(false);
+  const [persona, setPersona] = useState(null);
+  const [pathAssigned, setPathAssigned] = useState(null);
+  const [initialWebhook, setInitialWebhook] = useState('router');
+
+  const goToDashboard = () => {
+    setActiveScreen('screen-home');
+    setActiveNav('home');
+  };
 
   // Listen for Supabase auth state changes
   useEffect(() => {
+    const COPILOT_WEBHOOKS = ['router', 'path1', 'path_1'];
+
+    const navigateAfterLogin = async (user) => {
+      const { data } = await supabase
+        .from('users')
+        .select('active_webhook')
+        .eq('id', user.id)
+        .single();
+
+      const webhook = (data?.active_webhook || '').toLowerCase().trim();
+      const showCopilot = !webhook || COPILOT_WEBHOOKS.includes(webhook);
+
+      if (showCopilot) {
+        // For path_1 users, check if their session is already complete
+        if (webhook === 'path_1' || webhook === 'path1') {
+          const { data: sessionData } = await supabase
+            .from('sessions')
+            .select('session_complete')
+            .eq('user_id', user.id)
+            .eq('agent', 'path_1')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (sessionData?.session_complete) {
+            setActiveScreen('screen-home');
+            setActiveNav('home');
+            return;
+          }
+        }
+
+        const mappedWebhook = webhook === 'path_1' || webhook === 'path1' ? 'path1' : 'router';
+        setInitialWebhook(mappedWebhook);
+        setActiveScreen('screen-copilot');
+        setActiveNav('copilot');
+      } else {
+        setActiveScreen('screen-home');
+        setActiveNav('home');
+      }
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        setActiveScreen('screen-home');
-        // Fire webhook on login
-        callWebhook({
-          event: 'user_login',
-          email: session.user.email,
-          name: session.user.user_metadata?.full_name,
-          userId: session.user.id,
-        });
+        navigateAfterLogin(session.user);
       }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
+      if (_event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
-        setActiveScreen('screen-home');
-        setActiveNav('home');
-        if (_event === 'SIGNED_IN') {
-          callWebhook({
-            event: 'user_login',
-            email: session.user.email,
-            name: session.user.user_metadata?.full_name,
-            userId: session.user.id,
-          });
-        }
-      } else {
+        navigateAfterLogin(session.user);
+      } else if (_event === 'SIGNED_OUT') {
         setUser(null);
         setActiveScreen('screen-login');
+      } else if (session?.user) {
+        setUser(session.user);
       }
     });
 
@@ -229,7 +157,22 @@ export default function App() {
         {activeScreen === 'screen-home' && (
           <HomeScreen onOpenLog={() => setIsLogOpen(true)} user={user} />
         )}
-        {activeScreen === 'screen-copilot' && <CopilotScreen showToast={showToast} user={user} />}
+        {activeScreen === 'screen-copilot' && (
+          <CopilotScreen
+            showToast={showToast}
+            user={user}
+            initialWebhook={initialWebhook}
+            agentStage={agentStage}
+            setAgentStage={setAgentStage}
+            agentHandoff={agentHandoff}
+            setAgentHandoff={setAgentHandoff}
+            sessionComplete={sessionComplete}
+            setSessionComplete={setSessionComplete}
+            setPersona={setPersona}
+            setPathAssigned={setPathAssigned}
+            onSessionComplete={goToDashboard}
+          />
+        )}
         {activeScreen === 'screen-cohort' && <CohortScreen user={user} />}
         {activeScreen === 'screen-profile' && (
           <ProfileScreen
@@ -298,22 +241,18 @@ export default function App() {
         <div className="bottom-nav">
           <div className={`nav-item ${activeNav === 'home' ? 'active' : ''}`} onClick={() => navigate('screen-home', 'home')}>
             <LayoutGrid size={22} />
-            <span>Home</span>
           </div>
           <div className={`nav-item ${activeNav === 'copilot' ? 'active' : ''}`} onClick={() => navigate('screen-copilot', 'copilot')}>
             <Calendar size={22} />
-            <span>Co-Pilot</span>
           </div>
           <div className="nav-plus" onClick={() => setIsLogOpen(true)}>
             <Plus size={22} />
           </div>
           <div className={`nav-item ${activeNav === 'cohort' ? 'active' : ''}`} onClick={() => navigate('screen-cohort', 'cohort')}>
             <BarChart2 size={22} />
-            <span>Cohort</span>
           </div>
           <div className={`nav-item ${activeNav === 'profile' ? 'active' : ''}`} onClick={() => navigate('screen-profile', 'profile')}>
             <User size={22} />
-            <span>Profile</span>
           </div>
         </div>
       )}
