@@ -61,6 +61,72 @@ function ToolItem({ title, subtitle, content }) {
   );
 }
 
+function CheckInItem({ dayNumber, status, returnResponse, agentNotes }) {
+  const [open, setOpen] = useState(false);
+
+  const preview = returnResponse
+    ? returnResponse.substring(0, 60) + (returnResponse.length > 60 ? '…' : '')
+    : 'No response recorded';
+
+  return (
+    <div
+      style={{
+        background: 'var(--white)', borderRadius: '14px',
+        boxShadow: 'var(--shadow-sm)',
+        borderLeft: status === 'complete' ? '3px solid var(--teal)' : '3px solid var(--border)',
+        overflow: 'hidden', cursor: 'pointer',
+      }}
+      onClick={() => setOpen(!open)}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--teal)' }}>
+              Day {dayNumber} {status === 'complete' ? '✓' : ''}
+            </span>
+          </div>
+          {!open && (
+            <p style={{
+              fontSize: '13px', color: 'var(--text-mid)', margin: 0, lineHeight: '1.4',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {preview}
+            </p>
+          )}
+        </div>
+        <span style={{ color: 'var(--text-mid)', fontSize: '16px', marginLeft: '12px', flexShrink: 0 }}>
+          {open ? '▲' : '▼'}
+        </span>
+      </div>
+
+      {open && (
+        <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--border)' }}>
+          {returnResponse && (
+            <div style={{ marginTop: '14px' }}>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-mid)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                You said
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-dark)', margin: 0, lineHeight: '1.6', background: 'var(--bg)', borderRadius: '10px', padding: '10px 12px' }}>
+                "{returnResponse}"
+              </p>
+            </div>
+          )}
+          {agentNotes && (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-mid)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                Coach replied
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-dark)', margin: 0, lineHeight: '1.6', borderLeft: '3px solid var(--orange)', paddingLeft: '12px' }}>
+                {agentNotes}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
   if (!tasks.length) return null;
 
@@ -398,27 +464,13 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
           <h2 className="section-title">Recent Check-ins</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
             {recentProgress.map((p, i) => (
-              <div key={i} style={{
-                background: 'var(--white)', borderRadius: '14px',
-                padding: '14px 16px', boxShadow: 'var(--shadow-sm)',
-                borderLeft: p.status === 'complete' ? '3px solid var(--teal)' : '3px solid var(--border)',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--teal)' }}>
-                    Day {p.day_number} {p.status === 'complete' ? '✓' : ''}
-                  </span>
-                </div>
-                {p.return_response && (
-                  <p style={{ fontSize: '13px', color: 'var(--text-dark)', margin: 0, lineHeight: '1.5' }}>
-                    "{p.return_response}"
-                  </p>
-                )}
-                {p.agent_notes && (
-                  <p style={{ fontSize: '12px', color: 'var(--text-mid)', margin: '6px 0 0', lineHeight: '1.5' }}>
-                    {p.agent_notes.substring(0, 120)}{p.agent_notes.length > 120 ? '…' : ''}
-                  </p>
-                )}
-              </div>
+              <CheckInItem
+                key={i}
+                dayNumber={p.day_number}
+                status={p.status}
+                returnResponse={p.return_response}
+                agentNotes={p.agent_notes}
+              />
             ))}
           </div>
         </>
