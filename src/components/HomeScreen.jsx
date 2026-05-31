@@ -223,23 +223,21 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot }) {
       </div>
 
       {/* Next Action */}
-      {nextTask && (
-        <>
-          <h2 className="section-title">Next Action</h2>
-          <div className="next-action">
-            <div className="icon"><Send size={20} /></div>
-            <div className="body">
-              <h4>
-                {nextTask.day_number === 1 && recipient
+      <h2 className="section-title">Next Action</h2>
+      <div className="next-action">
+        <div className="icon"><Send size={20} /></div>
+        <div className="body">
+          <h4>
+            {nextTask
+              ? (nextTask.day_number === 1 && recipient
                   ? `Send pitch to ${recipient}${serviceCard?.service_name ? ` — ${serviceCard.service_name}` : ''}`
-                  : `${nextTask.title}${recipient ? ` — ${recipient}` : ''}`}
-              </h4>
-              <p>Day {nextTask.day_number} task</p>
-            </div>
-            <button className="btn" onClick={onOpenCopilot}>Do it</button>
-          </div>
-        </>
-      )}
+                  : `${nextTask.title}${recipient ? ` — ${recipient}` : ''}`)
+              : "Today's daily check-in"}
+          </h4>
+          <p>{nextTask ? `Day ${nextTask.day_number} task` : `Day ${dayNumber}`}</p>
+        </div>
+        <button className="btn" onClick={onOpenCopilot}>Do it</button>
+      </div>
 
       {/* Service Card Summary (replaces confidence slider) */}
       {serviceCard && (
