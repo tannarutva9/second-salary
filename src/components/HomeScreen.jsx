@@ -265,7 +265,6 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       supabase.from('daily_tasks')
         .select('id, day_number, title, is_day9_milestone, action_type, milestone_type')
         .eq('path', path)
-        .is('branch_type', null)
         .lte('day_number', 9)
         .order('day_number', { ascending: true }),
       supabase.from('protection_toolkit')
@@ -290,21 +289,9 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
 
     const completedProgress = progress.filter(p => p.status === 'complete');
 
-    // DEBUG — remove after fixing
-    console.log('[SS Debug] daily_progress rows:', progress);
-    console.log('[SS Debug] daily_tasks rows:', tasks);
-    console.log('[SS Debug] taskById keys:', Object.keys(taskById));
-    console.log('[SS Debug] completedProgress:', completedProgress);
-    console.log('[SS Debug] path filter value:', path);
-    completedProgress.forEach(p => {
-      console.log(`[SS Debug] progress day ${p.day_number} — task_id: ${p.task_id} — task found:`, taskById[p.task_id]);
-    });
-
     const dmsSent = completedProgress.filter(p => taskById[p.task_id]?.action_type === 'send_message').length;
     const pipeline = completedProgress.filter(p => taskById[p.task_id]?.milestone_type === 'pitch_sent').length;
     const proposals = completedProgress.filter(p => taskById[p.task_id]?.milestone_type === 'contract_sent').length;
-
-    console.log('[SS Debug] dmsSent:', dmsSent, '| pipeline:', pipeline, '| proposals:', proposals);
 
     const completedDays = new Set(completedProgress.map(p => p.day_number));
     const pendingTask = tasks.find(t => !completedDays.has(t.day_number) && t.day_number <= dayNumber);
