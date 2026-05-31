@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutGrid, Calendar, Plus, BarChart2, User } from 'lucide-react';
+import { LayoutGrid, MessageSquare, Plus, Users, User } from 'lucide-react';
 import './index.css';
 
 import { supabase, callWebhook } from './supabaseClient';
@@ -15,8 +15,8 @@ export default function App() {
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [theme, setTheme] = useState('light');
   const [toastMessage, setToastMessage] = useState(null);
-  const [showReminder, setShowReminder] = useState(false);
   const [user, setUser] = useState(null);
+  const [earningsRefreshKey, setEarningsRefreshKey] = useState(0);
   const [logAmount, setLogAmount] = useState('');
   const [agentStage, setAgentStage] = useState(null);
   const [agentHandoff, setAgentHandoff] = useState(null);
@@ -170,13 +170,6 @@ export default function App() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // 8 PM daily reminder simulation (fires 5s after login)
-  useEffect(() => {
-    if (activeScreen !== 'screen-home') return;
-    const timer = setTimeout(() => setShowReminder(true), 5000);
-    return () => clearTimeout(timer);
-  }, [activeScreen]);
-
   const showToast = (message) => {
     setToastMessage(message);
     setTimeout(() => setToastMessage(null), 3000);
@@ -193,18 +186,33 @@ export default function App() {
   };
 
   const handleSaveEarnings = async () => {
+    if (!logAmount || !user) return;
+
+    await supabase.from('income_log').insert({
+      user_id: user.id,
+      path: 'path_1',
+      amount: parseInt(logAmount),
+      source_type: 'consulting_project',
+      source_description: 'Logged via app',
+      is_first_earning: false,
+      verified: false,
+    });
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('total_earned')
+      .eq('id', user.id)
+      .single();
+
+    await supabase
+      .from('users')
+      .update({ total_earned: (userData?.total_earned || 0) + parseInt(logAmount) })
+      .eq('id', user.id);
+
     setIsLogOpen(false);
-    showToast('✅ Earnings Logged Successfully!');
-    if (user) {
-      callWebhook({
-        event: 'earnings_logged',
-        email: user.email,
-        amount: logAmount,
-        userId: user.id,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    showToast('✅ ₹' + parseInt(logAmount).toLocaleString('en-IN') + ' logged!');
     setLogAmount('');
+    setEarningsRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -212,25 +220,13 @@ export default function App() {
       {/* Toast */}
       {toastMessage && <div className="toast-container">{toastMessage}</div>}
 
-      {/* 8 PM Reminder */}
-      {showReminder && activeScreen !== 'screen-login' && (
-        <div className="reminder-modal" onClick={() => setShowReminder(false)}>
-          <span>🔔</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '12px', opacity: 0.85, fontWeight: '600' }}>8:00 PM • Daily Reminder</div>
-            <div style={{ fontSize: '15px', fontWeight: '700' }}>Don't forget to log today's earnings!</div>
-          </div>
-          <button style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px' }}>✕</button>
-        </div>
-      )}
-
       {/* Screen content */}
       <div className="screen-animate" key={activeScreen}>
         {activeScreen === 'screen-login' && (
           <AuthScreen onLogin={() => {}} />
         )}
         {activeScreen === 'screen-home' && (
-          <HomeScreen onOpenLog={() => setIsLogOpen(true)} user={user} onOpenCopilot={navigateToCopilot} />
+          <HomeScreen onOpenLog={() => setIsLogOpen(true)} user={user} onOpenCopilot={navigateToCopilot} refreshKey={earningsRefreshKey} />
         )}
         {activeScreen === 'screen-copilot' && (
           <CopilotScreen
@@ -319,14 +315,14 @@ export default function App() {
           <div className={`nav-item ${activeNav === 'home' ? 'active' : ''}`} onClick={() => navigate('screen-home', 'home')}>
             <LayoutGrid size={22} />
           </div>
-          <div className={`nav-item ${activeNav === 'copilot' ? 'active' : ''}`} onClick={() => navigate('screen-copilot', 'copilot')}>
-            <Calendar size={22} />
+          <div className={`nav-item ${activeNav === 'copilot' ? 'active' : ''}`} onClick={navigateToCopilot}>
+            <MessageSquare size={22} />
           </div>
           <div className="nav-plus" onClick={() => setIsLogOpen(true)}>
             <Plus size={22} />
           </div>
           <div className={`nav-item ${activeNav === 'cohort' ? 'active' : ''}`} onClick={() => navigate('screen-cohort', 'cohort')}>
-            <BarChart2 size={22} />
+            <Users size={22} />
           </div>
           <div className={`nav-item ${activeNav === 'profile' ? 'active' : ''}`} onClick={() => navigate('screen-profile', 'profile')}>
             <User size={22} />

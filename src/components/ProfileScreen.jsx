@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
-import { callWebhook } from '../supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 
 export default function ProfileScreen({ theme, setTheme, showToast, user, onLogout }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [name, setName] = useState(user?.user_metadata?.full_name || '');
-  const [niche, setNiche] = useState('B2B SaaS Growth');
+  const [niche, setNiche] = useState('');
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.role) setNiche(data.role);
+      });
+  }, [user?.id]);
 
   const handleSaveProfile = async () => {
+    await supabase.from('users')
+      .update({ role: niche })
+      .eq('id', user.id);
     showToast('✅ Profile Updated!');
-    if (user) {
-      callWebhook({
-        event: 'profile_updated',
-        email: user.email,
-        name,
-        niche,
-        userId: user.id,
-      });
-    }
   };
 
   const tabStyle = (tab) => ({
