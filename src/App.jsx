@@ -42,16 +42,25 @@ export default function App() {
 
     if (sessionError || !sessionData) throw new Error('path_1 session not found');
 
-    const sessionStart = new Date(sessionData.created_at);
-    const dayNumber = Math.max(2, Math.min(9,
-      Math.floor((Date.now() - sessionStart) / 86400000) + 1
-    ));
+    // Compute day number from last completed daily_progress row — more accurate than calendar counting
+    const { data: progressData } = await supabase
+      .from('daily_progress')
+      .select('day_number')
+      .eq('user_id', userId)
+      .eq('status', 'complete')
+      .order('day_number', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const lastCompletedDay = progressData?.day_number || 1;
+    const dayNumber = Math.min(lastCompletedDay + 1, 9);
 
     const { data: taskData } = await supabase
       .from('daily_tasks')
       .select('return_question, title')
       .eq('path', 'path_1')
-      .eq('day_number', Math.min(dayNumber, 9))
+      .eq('day_number', dayNumber)
+      .is('branch_type', null)
       .limit(1)
       .maybeSingle();
 

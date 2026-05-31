@@ -275,7 +275,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
         .eq('user_id', user.id)
         .eq('path', path),
       supabase.from('daily_tasks')
-        .select('id, day_number, title, is_day9_milestone, action_type, milestone_type')
+        .select('id, day_number, title, is_day9_milestone, action_type, milestone_type, branch_type')
         .eq('path', path)
         .lte('day_number', 9)
         .order('day_number', { ascending: true }),
@@ -296,8 +296,12 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
     const toolkit = toolkitRes.data || [];
     const recentProgress = recentProgressRes.data || [];
 
+    // Filter out branch tasks — only show universal tasks (branch_type null)
+    // Branch tasks are only relevant inside the daily loop agent, not on the dashboard
+    const universalTasks = tasks.filter(t => t.branch_type === null);
+
     const taskById = {};
-    tasks.forEach(t => { taskById[t.id] = t; });
+    universalTasks.forEach(t => { taskById[t.id] = t; });
 
     const completedProgress = progress.filter(p => p.status === 'complete');
 
@@ -310,8 +314,8 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
     // Then fall back to the next upcoming incomplete task
     // Never show a past day as "next action" — that's confusing
     const pendingTask =
-      tasks.find(t => t.day_number === Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
-      tasks.find(t => t.day_number > Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
+      universalTasks.find(t => t.day_number === Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
+      universalTasks.find(t => t.day_number > Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
       null;
 
     setDashData({
@@ -319,9 +323,9 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       dayNumber, monthsActive,
       day9Hit: u.day9_milestone_hit || false,
       dmsSent, pipeline, proposals,
-      serviceCard, tasks, completedDays,
+      serviceCard, tasks: universalTasks, completedDays,
       toolkit, recentProgress,
-      nextTask: pendingTask || tasks.find(t => t.day_number === Math.min(dayNumber, 9)),
+      nextTask: pendingTask || universalTasks.find(t => t.day_number === Math.min(dayNumber, 9)),
       recipient: s.day1_recipient,
     });
 
