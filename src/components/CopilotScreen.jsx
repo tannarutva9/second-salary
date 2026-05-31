@@ -234,6 +234,7 @@ export default function CopilotScreen({
   setPersona, setPathAssigned,
   onSessionComplete,
 }) {
+  const hasInitialised = useRef(false);
   const [messages, setMessages] = useState(() => {
     if (mode === 'return' && copilotContext) {
       const { dayNumber, recipient, returnQuestion } = copilotContext;
@@ -249,12 +250,17 @@ export default function CopilotScreen({
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (mode === 'return' && copilotContext) {
+    if (mode === 'return' && copilotContext && !hasInitialised.current) {
+      hasInitialised.current = true;
       const { dayNumber, recipient, returnQuestion } = copilotContext;
       const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
       setMessages([{ role: 'assistant', text: greeting }]);
     }
   }, [mode, copilotContext]);
+
+  useEffect(() => {
+    return () => { hasInitialised.current = false; };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

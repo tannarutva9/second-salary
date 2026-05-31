@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LayoutGrid, Calendar, Plus, BarChart2, User } from 'lucide-react';
 import './index.css';
 
@@ -50,7 +50,6 @@ export default function App() {
       .select('return_question, title')
       .eq('path', 'path_1')
       .eq('day_number', Math.min(dayNumber, 9))
-      .is('branch_type', null)
       .single();
 
     const serviceCard = sessionData.output_generated
@@ -67,7 +66,7 @@ export default function App() {
     };
   };
 
-  const navigateToCopilot = async () => {
+  const navigateToCopilot = useCallback(async () => {
     if (!user) return;
 
     const { data: userData } = await supabase
@@ -89,7 +88,7 @@ export default function App() {
       setActiveScreen('screen-copilot');
       setActiveNav('copilot');
     }
-  };
+  }, [user]);
 
   // Listen for Supabase auth state changes
   useEffect(() => {
@@ -111,8 +110,8 @@ export default function App() {
           setCopilotMode('return');
           setCopilotContext(context);
           setInitialWebhook('daily_loop');
-          setActiveScreen('screen-copilot');
-          setActiveNav('copilot');
+          setActiveScreen('screen-home');
+          setActiveNav('home');
           return;
         }
 
