@@ -5,23 +5,51 @@ export default function ProfileScreen({ theme, setTheme, showToast, user, onLogo
   const [activeTab, setActiveTab] = useState('profile');
   const [name, setName] = useState(user?.user_metadata?.full_name || '');
   const [niche, setNiche] = useState('');
+  const [notificationTime, setNotificationTime] = useState('20:00');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
     supabase.from('users')
-      .select('role')
+      .select('role, notification_time')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.role) setNiche(data.role);
+        if (data?.notification_time) setNotificationTime(data.notification_time.substring(0, 5));
       });
   }, [user?.id]);
 
   const handleSaveProfile = async () => {
     await supabase.from('users')
-      .update({ role: niche })
+      .update({ role: niche, notification_time: notificationTime + ':00' })
       .eq('id', user.id);
     showToast('✅ Profile Updated!');
+  };
+
+  const handlePasswordChange = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      showToast('❌ Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('❌ Passwords do not match');
+      return;
+    }
+    setPasswordLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) {
+      showToast('❌ ' + error.message);
+    } else {
+      showToast('🔒 Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
   };
 
   const tabStyle = (tab) => ({
@@ -82,6 +110,12 @@ export default function ProfileScreen({ theme, setTheme, showToast, user, onLogo
           <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-mid)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Consulting Niche</label>
           <input type="text" value={niche} onChange={e => setNiche(e.target.value)} style={inputStyle} placeholder="e.g. B2B SaaS Growth" />
 
+          <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-mid)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Daily Reminder Time</label>
+          <input type="time" value={notificationTime} onChange={e => setNotificationTime(e.target.value)} style={inputStyle} />
+          <p style={{ fontSize: '12px', color: 'var(--text-mid)', marginTop: '-10px', marginBottom: '16px' }}>
+            We'll remind you to check in at this time each day.
+          </p>
+
           <button className="hero-btn" style={{ width: '100%', padding: '16px', borderRadius: '14px' }} onClick={handleSaveProfile}>
             Save Changes
           </button>
@@ -106,13 +140,18 @@ export default function ProfileScreen({ theme, setTheme, showToast, user, onLogo
 
           <h4 style={{ marginBottom: '16px', fontSize: '17px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>Change Password</h4>
           <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-mid)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current Password</label>
-          <input type="password" placeholder="••••••••" style={inputStyle} />
+          <input type="password" placeholder="••••••••" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} style={inputStyle} />
           <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-mid)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>New Password</label>
-          <input type="password" placeholder="••••••••" style={inputStyle} />
+          <input type="password" placeholder="••••••••" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={inputStyle} />
           <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-mid)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Confirm New Password</label>
-          <input type="password" placeholder="••••••••" style={inputStyle} />
-          <button className="hero-btn" style={{ width: '100%', padding: '16px', borderRadius: '14px' }} onClick={() => showToast('🔒 Password Updated!')}>
-            Update Password
+          <input type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={inputStyle} />
+          <button
+            className="hero-btn"
+            style={{ width: '100%', padding: '16px', borderRadius: '14px', opacity: passwordLoading ? 0.7 : 1 }}
+            onClick={handlePasswordChange}
+            disabled={passwordLoading}
+          >
+            {passwordLoading ? 'Updating…' : 'Update Password'}
           </button>
         </div>
       )}
