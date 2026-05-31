@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { callWebhook } from '../supabaseClient';
 
-const HANDOFF_WEBHOOK_MAP = { path_1: 'path1' };
+const HANDOFF_WEBHOOK_MAP = { path_1: 'path_1' };
 
 function parseAssistantMessage(raw) {
   const withoutExtract = raw.replace(/<EXTRACT>[\s\S]*?<\/EXTRACT>/g, '').trim();
@@ -228,18 +228,39 @@ function MessageText({ text }) {
 export default function CopilotScreen({
   showToast, user,
   initialWebhook = 'router',
+  mode = 'onboarding',
+  copilotContext = null,
   setAgentStage, setAgentHandoff, setSessionComplete,
   setPersona, setPathAssigned,
   onSessionComplete,
 }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }
-  ]);
+  const hasInitialised = useRef(false);
+  const [messages, setMessages] = useState(() => {
+    if (mode === 'return' && copilotContext) {
+      const { dayNumber, recipient, returnQuestion } = copilotContext;
+      const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
+      return [{ role: 'assistant', text: greeting }];
+    }
+    return [{ role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeWebhook, setActiveWebhook] = useState(initialWebhook);
   const [sessionDone, setSessionDone] = useState(false);
   const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (mode === 'return' && copilotContext && !hasInitialised.current) {
+      hasInitialised.current = true;
+      const { dayNumber, recipient, returnQuestion } = copilotContext;
+      const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
+      setMessages([{ role: 'assistant', text: greeting }]);
+    }
+  }, [mode, copilotContext]);
+
+  useEffect(() => {
+    return () => { hasInitialised.current = false; };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -256,11 +277,30 @@ export default function CopilotScreen({
     const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
     const firstName = fullName.split(' ')[0];
 
-    const response = await callWebhook({
-      user_id: user?.id,
-      message: text,
-      first_name: firstName,
-    }, activeWebhook);
+    const payload = (mode === 'return' && initialWebhook === 'daily_loop')
+      ? {
+          event: 'daily_message',
+          user_id: user?.id,
+          email: user?.email,
+          message: text,
+          timestamp: new Date().toISOString(),
+        }
+      : (mode === 'return' && initialWebhook === 'path_1')
+      ? {
+          event: 'daily_return',
+          day_number: copilotContext?.dayNumber,
+          user_id: user?.id,
+          email: user?.email,
+          message: text,
+          recipient: copilotContext?.recipient,
+        }
+      : {
+          user_id: user?.id,
+          message: text,
+          first_name: firstName,
+        };
+
+    const response = await callWebhook(payload, activeWebhook);
 
     // Router format: { message, stage, handoff, session_complete }
     // Path1 format: full session record with messages as a JSON string

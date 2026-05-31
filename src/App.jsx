@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LayoutGrid, Calendar, Plus, BarChart2, User } from 'lucide-react';
 import './index.css';
 
@@ -24,16 +24,82 @@ export default function App() {
   const [persona, setPersona] = useState(null);
   const [pathAssigned, setPathAssigned] = useState(null);
   const [initialWebhook, setInitialWebhook] = useState('router');
+  const [copilotMode, setCopilotMode] = useState('onboarding');
+  const [copilotContext, setCopilotContext] = useState(null);
 
   const goToDashboard = () => {
     setActiveScreen('screen-home');
     setActiveNav('home');
   };
 
+  const buildDailyLoopContext = async (userId) => {
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('sessions')
+      .select('created_at, day1_recipient, output_generated, last_checkin_date')
+      .eq('user_id', userId)
+      .eq('agent', 'path_1')
+      .single();
+
+    if (sessionError || !sessionData) throw new Error('path_1 session not found');
+
+    const sessionStart = new Date(sessionData.created_at);
+    const dayNumber = Math.max(2, Math.min(9,
+      Math.floor((Date.now() - sessionStart) / 86400000) + 1
+    ));
+
+    const { data: taskData } = await supabase
+      .from('daily_tasks')
+      .select('return_question, title')
+      .eq('path', 'path_1')
+      .eq('day_number', Math.min(dayNumber, 9))
+      .limit(1)
+      .maybeSingle();
+
+    const serviceCard = sessionData.output_generated
+      ? (typeof sessionData.output_generated === 'string'
+          ? JSON.parse(sessionData.output_generated)
+          : sessionData.output_generated)
+      : null;
+
+    return {
+      dayNumber,
+      recipient: sessionData.day1_recipient,
+      returnQuestion: taskData?.return_question || 'How did it go?',
+      serviceCard,
+    };
+  };
+
+  const navigateToCopilot = useCallback(async () => {
+    if (!user) return;
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('active_webhook')
+      .eq('id', user.id)
+      .single();
+
+    const webhook = userData?.active_webhook;
+
+    if (webhook === 'daily_loop') {
+      try {
+        const context = await buildDailyLoopContext(user.id);
+        setCopilotMode('return');
+        setCopilotContext(context);
+      } catch {
+        setCopilotMode('return');
+        setCopilotContext(null);
+      }
+      setInitialWebhook('daily_loop');
+      setActiveScreen('screen-copilot');
+      setActiveNav('copilot');
+    } else {
+      setActiveScreen('screen-copilot');
+      setActiveNav('copilot');
+    }
+  }, [user]);
+
   // Listen for Supabase auth state changes
   useEffect(() => {
-    const COPILOT_WEBHOOKS = ['router', 'path1', 'path_1'];
-
     const navigateAfterLogin = async (user) => {
       const { data } = await supabase
         .from('users')
@@ -42,35 +108,44 @@ export default function App() {
         .single();
 
       const webhook = (data?.active_webhook || '').toLowerCase().trim();
-      const showCopilot = !webhook || COPILOT_WEBHOOKS.includes(webhook);
 
-      if (showCopilot) {
-        // For path_1 users, check if their session is already complete
-        if (webhook === 'path_1' || webhook === 'path1') {
-          const { data: sessionData } = await supabase
-            .from('sessions')
-            .select('session_complete')
-            .eq('user_id', user.id)
-            .eq('agent', 'path_1')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          if (sessionData?.session_complete) {
-            setActiveScreen('screen-home');
-            setActiveNav('home');
-            return;
-          }
+      if (webhook === 'daily_loop') {
+        try {
+          const context = await buildDailyLoopContext(user.id);
+          setCopilotMode('return');
+          setCopilotContext(context);
+          setInitialWebhook('daily_loop');
+        } catch {
+          setCopilotMode('return');
+          setCopilotContext(null);
+          setInitialWebhook('daily_loop');
         }
-
-        const mappedWebhook = webhook === 'path_1' || webhook === 'path1' ? 'path1' : 'router';
-        setInitialWebhook(mappedWebhook);
-        setActiveScreen('screen-copilot');
-        setActiveNav('copilot');
-      } else {
         setActiveScreen('screen-home');
         setActiveNav('home');
+        return;
       }
+
+      if (webhook === 'path_1') {
+        setInitialWebhook('path_1');
+        setCopilotMode('onboarding');
+        setCopilotContext(null);
+        setActiveScreen('screen-copilot');
+        setActiveNav('copilot');
+        return;
+      }
+
+      if (webhook === 'router' || !webhook) {
+        setInitialWebhook('router');
+        setCopilotMode('onboarding');
+        setCopilotContext(null);
+        setActiveScreen('screen-copilot');
+        setActiveNav('copilot');
+        return;
+      }
+
+      // any other active_webhook value (specs, custom) → home
+      setActiveScreen('screen-home');
+      setActiveNav('home');
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -155,13 +230,15 @@ export default function App() {
           <AuthScreen onLogin={() => {}} />
         )}
         {activeScreen === 'screen-home' && (
-          <HomeScreen onOpenLog={() => setIsLogOpen(true)} user={user} />
+          <HomeScreen onOpenLog={() => setIsLogOpen(true)} user={user} onOpenCopilot={navigateToCopilot} />
         )}
         {activeScreen === 'screen-copilot' && (
           <CopilotScreen
             showToast={showToast}
             user={user}
             initialWebhook={initialWebhook}
+            mode={copilotMode}
+            copilotContext={copilotContext}
             agentStage={agentStage}
             setAgentStage={setAgentStage}
             agentHandoff={agentHandoff}

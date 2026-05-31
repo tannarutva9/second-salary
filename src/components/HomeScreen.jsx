@@ -90,7 +90,7 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
   );
 }
 
-export default function HomeScreen({ onOpenLog, user }) {
+export default function HomeScreen({ onOpenLog, user, onOpenCopilot }) {
   const [dashData, setDashData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -133,7 +133,7 @@ export default function HomeScreen({ onOpenLog, user }) {
 
     const [progressRes, tasksRes] = await Promise.all([
       supabase.from('daily_progress')
-        .select('status, milestone_type, day_number, task:daily_tasks(action_type)')
+        .select('status, day_number, task_id')
         .eq('user_id', user.id),
       supabase.from('daily_tasks')
         .select('id, day_number, title, is_day9_milestone')
@@ -146,9 +146,9 @@ export default function HomeScreen({ onOpenLog, user }) {
     const progress = progressRes.data || [];
     const tasks = tasksRes.data || [];
 
-    const dmsSent = progress.filter(p => p.task?.action_type === 'send_message' && p.status === 'complete').length;
-    const pipeline = progress.filter(p => p.milestone_type === 'pitch_sent' && p.status === 'complete').length;
-    const proposals = progress.filter(p => p.milestone_type === 'contract_sent' && p.status === 'complete').length;
+    const dmsSent = progress.filter(p => p.status === 'complete').length;
+    const pipeline = 0;
+    const proposals = 0;
     const completedDays = new Set(progress.filter(p => p.status === 'complete').map(p => p.day_number));
 
     const pendingTask = tasks.find(t => !completedDays.has(t.day_number) && t.day_number <= dayNumber);
@@ -223,19 +223,21 @@ export default function HomeScreen({ onOpenLog, user }) {
       </div>
 
       {/* Next Action */}
-      {nextTask && (
-        <>
-          <h2 className="section-title">Next Action</h2>
-          <div className="next-action">
-            <div className="icon"><Send size={20} /></div>
-            <div className="body">
-              <h4>{nextTask.title}{recipient ? ` — ${recipient}` : ''}</h4>
-              <p>Day {nextTask.day_number} task</p>
-            </div>
-            <button className="btn">Do it</button>
-          </div>
-        </>
-      )}
+      <h2 className="section-title">Next Action</h2>
+      <div className="next-action">
+        <div className="icon"><Send size={20} /></div>
+        <div className="body">
+          <h4>
+            {nextTask
+              ? (nextTask.day_number === 1 && recipient
+                  ? `Send pitch to ${recipient}${serviceCard?.service_name ? ` — ${serviceCard.service_name}` : ''}`
+                  : `${nextTask.title}${recipient ? ` — ${recipient}` : ''}`)
+              : "Today's daily check-in"}
+          </h4>
+          <p>{nextTask ? `Day ${nextTask.day_number} task` : `Day ${dayNumber}`}</p>
+        </div>
+        <button className="btn" onClick={onOpenCopilot}>Do it</button>
+      </div>
 
       {/* Service Card Summary (replaces confidence slider) */}
       {serviceCard && (

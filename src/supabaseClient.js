@@ -6,8 +6,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export const WEBHOOKS = {
-  router: 'https://info15779.n8n-wsk.com/webhook/ss-router', // User personalisation
-  path1: 'https://info15779.n8n-wsk.com/webhook/ss-path1',  // Burnt starter agent
+  router:     'https://info15779.n8n-wsk.com/webhook/ss-router',
+  path_1:     'https://info15779.n8n-wsk.com/webhook/ss-path1',
+  daily_loop: 'https://info15779.n8n-wsk.com/webhook/ss-daily-loop',
 };
 
 export async function callWebhook(eventPayload, type = 'router') {
