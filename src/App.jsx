@@ -55,14 +55,15 @@ export default function App() {
     const lastCompletedDay = progressData?.day_number || 1;
     const dayNumber = Math.min(lastCompletedDay + 1, 9);
 
-    const { data: taskData } = await supabase
+    // Fetch all rows for this day then pick the universal task client-side
+    // Avoids .is() filter inconsistency with PostgREST
+    const { data: allTaskData } = await supabase
       .from('daily_tasks')
-      .select('return_question, title')
+      .select('return_question, title, branch_type')
       .eq('path', 'path_1')
-      .eq('day_number', dayNumber)
-      .is('branch_type', null)
-      .limit(1)
-      .maybeSingle();
+      .eq('day_number', dayNumber);
+
+    const taskData = allTaskData?.find(t => t.branch_type === null) || allTaskData?.[0] || null;
 
     const serviceCard = sessionData.output_generated
       ? (typeof sessionData.output_generated === 'string'
@@ -73,7 +74,7 @@ export default function App() {
     return {
       dayNumber,
       recipient: sessionData.day1_recipient,
-      returnQuestion: taskData?.return_question || 'How did it go?',
+      returnQuestion: taskData?.return_question || 'How did it go today?',
       serviceCard,
     };
   };
