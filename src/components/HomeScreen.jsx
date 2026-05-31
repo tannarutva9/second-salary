@@ -4,6 +4,91 @@ import { supabase } from '../supabaseClient';
 
 const CIRCUMFERENCE = 251.2; // 2π × r40
 
+function CelebrationScreen({ userName, totalEarned, serviceCard, recipient, onContinue }) {
+  const [showDashboard, setShowDashboard] = useState(false);
+
+  if (showDashboard) return null;
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(160deg, var(--teal) 0%, #0f4c4c 100%)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '40px 28px', textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '64px', marginBottom: '16px', lineHeight: 1 }}>🎉</div>
+
+      <h1 style={{ fontSize: '32px', fontWeight: '900', color: 'white', lineHeight: '1.2', marginBottom: '8px' }}>
+        You did it, {userName}.
+      </h1>
+      <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.8)', marginBottom: '32px', lineHeight: '1.5' }}>
+        Day 9. First project closed.
+      </p>
+
+      <div style={{
+        background: 'rgba(255,255,255,0.12)', borderRadius: '20px',
+        padding: '24px 28px', width: '100%', maxWidth: '340px',
+        marginBottom: '32px', border: '1px solid rgba(255,255,255,0.2)',
+      }}>
+        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          Total Earned Outside Salary
+        </div>
+        <div style={{ fontSize: '42px', fontWeight: '900', color: 'white', marginBottom: '12px' }}>
+          ₹{totalEarned.toLocaleString('en-IN')}
+        </div>
+        {serviceCard?.service_name && (
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)', marginBottom: '4px' }}>
+            {serviceCard.service_name}
+          </div>
+        )}
+        {recipient && (
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+            First client: {recipient}
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        background: 'rgba(255,255,255,0.08)', borderRadius: '14px',
+        padding: '16px 20px', width: '100%', maxWidth: '340px',
+        marginBottom: '32px', textAlign: 'left',
+      }}>
+        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', lineHeight: '1.6', margin: 0 }}>
+          You went from "I want more income" to earning ₹{totalEarned.toLocaleString('en-IN')} outside your salary in 9 days. That's real. Nobody can take that from you.
+        </p>
+      </div>
+
+      <button
+        onClick={() => { setShowDashboard(true); onContinue(); }}
+        style={{
+          width: '100%', maxWidth: '340px', padding: '18px', borderRadius: '16px',
+          background: 'var(--orange)', border: 'none',
+          color: 'white', fontSize: '16px', fontWeight: '800',
+          cursor: 'pointer', marginBottom: '12px',
+        }}
+      >
+        Go to Dashboard →
+      </button>
+
+      <button
+        onClick={() => {
+          const text = `Just closed my first consulting project and earned ₹${totalEarned.toLocaleString('en-IN')} outside my salary in 9 days 🎉 #SecondSalary`;
+          if (navigator.share) { navigator.share({ text }); }
+          else { navigator.clipboard.writeText(text); }
+        }}
+        style={{
+          width: '100%', maxWidth: '340px', padding: '16px', borderRadius: '16px',
+          background: 'transparent', border: '1.5px solid rgba(255,255,255,0.4)',
+          color: 'white', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+        }}
+      >
+        Share your milestone 🚀
+      </button>
+    </div>
+  );
+}
+
 function StatPill({ value, label, color = 'orange' }) {
   return (
     <div className="stat-pill">
@@ -215,6 +300,7 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit, onOpenCopilot }
 export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey }) {
   const [dashData, setDashData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [celebrationDismissed, setCelebrationDismissed] = useState(false);
 
   const displayName = (user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there').split(' ')[0];
   const hour = new Date().getHours();
@@ -341,6 +427,18 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
         <p style={{ color: 'var(--text-mid)', fontSize: '14px' }}>Loading your dashboard…</p>
       </div>
+    );
+  }
+
+  if (dashData?.day9Hit && !celebrationDismissed) {
+    return (
+      <CelebrationScreen
+        userName={displayName}
+        totalEarned={dashData.totalEarned}
+        serviceCard={dashData.serviceCard}
+        recipient={dashData.recipient}
+        onContinue={() => setCelebrationDismissed(true)}
+      />
     );
   }
 
