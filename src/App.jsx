@@ -32,40 +32,68 @@ export default function App() {
     setActiveNav('home');
   };
 
-  const navigateToCopilot = async () => {
-    if (!user) return;
+  const buildDailyLoopContext = async (userId) => {
     const { data: sessionData } = await supabase
       .from('sessions')
-      .select('created_at, day1_recipient, output_generated')
-      .eq('user_id', user.id)
+      .select('created_at, day1_recipient, output_generated, last_checkin_date')
+      .eq('user_id', userId)
       .eq('agent', 'path_1')
-      .order('created_at', { ascending: false })
-      .limit(1)
       .single();
-    const sessionStart = sessionData?.created_at ? new Date(sessionData.created_at) : new Date();
-    const dayNumber = Math.max(1, Math.min(30, Math.floor((Date.now() - sessionStart) / 86400000) + 1));
+
+    const sessionStart = new Date(sessionData.created_at);
+    const dayNumber = Math.max(2, Math.min(9,
+      Math.floor((Date.now() - sessionStart) / 86400000) + 1
+    ));
+
     const { data: taskData } = await supabase
       .from('daily_tasks')
-      .select('return_question')
+      .select('return_question, title')
       .eq('path', 'path_1')
+      .eq('day_number', Math.min(dayNumber, 9))
       .is('branch_type', null)
-      .eq('day_number', dayNumber)
-      .maybeSingle();
-    setCopilotMode('return');
-    setCopilotContext({
+      .single();
+
+    const serviceCard = sessionData.output_generated
+      ? (typeof sessionData.output_generated === 'string'
+          ? JSON.parse(sessionData.output_generated)
+          : sessionData.output_generated)
+      : null;
+
+    return {
       dayNumber,
-      recipient: sessionData?.day1_recipient || '',
-      returnQuestion: taskData?.return_question || 'What did you work on today?',
-      serviceCard: sessionData?.output_generated || null,
-    });
-    setInitialWebhook('path_1');
-    setActiveScreen('screen-copilot');
-    setActiveNav('copilot');
+      recipient: sessionData.day1_recipient,
+      returnQuestion: taskData?.return_question || 'How did it go?',
+      serviceCard,
+    };
+  };
+
+  const navigateToCopilot = async () => {
+    if (!user) return;
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('active_webhook')
+      .eq('id', user.id)
+      .single();
+
+    const webhook = userData?.active_webhook;
+
+    if (webhook === 'daily_loop') {
+      const context = await buildDailyLoopContext(user.id);
+      setCopilotMode('return');
+      setCopilotContext(context);
+      setInitialWebhook('daily_loop');
+      setActiveScreen('screen-copilot');
+      setActiveNav('copilot');
+    } else {
+      setActiveScreen('screen-copilot');
+      setActiveNav('copilot');
+    }
   };
 
   // Listen for Supabase auth state changes
   useEffect(() => {
-    const COPILOT_WEBHOOKS = ['router', 'path_1'];
+    const COPILOT_WEBHOOKS = ['router', 'path_1', 'daily_loop'];
 
     const navigateAfterLogin = async (user) => {
       const { data } = await supabase
@@ -78,6 +106,16 @@ export default function App() {
       const showCopilot = !webhook || COPILOT_WEBHOOKS.includes(webhook);
 
       if (showCopilot) {
+        if (webhook === 'daily_loop') {
+          const context = await buildDailyLoopContext(user.id);
+          setCopilotMode('return');
+          setCopilotContext(context);
+          setInitialWebhook('daily_loop');
+          setActiveScreen('screen-copilot');
+          setActiveNav('copilot');
+          return;
+        }
+
         // For path_1 users, check if their session is already complete
         if (webhook === 'path_1') {
           const { data: sessionData } = await supabase

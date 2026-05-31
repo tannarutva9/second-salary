@@ -234,20 +234,27 @@ export default function CopilotScreen({
   setPersona, setPathAssigned,
   onSessionComplete,
 }) {
-  const returnGreeting = mode === 'return' && copilotContext
-    ? `Welcome back! It's Day ${copilotContext.dayNumber}. ${(copilotContext.returnQuestion || '').replace('[recipient]', copilotContext.recipient || '')}`
-    : null;
-
-  const [messages, setMessages] = useState(
-    returnGreeting
-      ? [{ role: 'assistant', text: returnGreeting }]
-      : [{ role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }]
-  );
+  const [messages, setMessages] = useState(() => {
+    if (mode === 'return' && copilotContext) {
+      const { dayNumber, recipient, returnQuestion } = copilotContext;
+      const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
+      return [{ role: 'assistant', text: greeting }];
+    }
+    return [{ role: 'assistant', text: "Hi! I'm your Second Salary co-pilot. Tell me about your consulting goal and I'll help you get there." }];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeWebhook, setActiveWebhook] = useState(initialWebhook);
   const [sessionDone, setSessionDone] = useState(false);
   const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (mode === 'return' && copilotContext) {
+      const { dayNumber, recipient, returnQuestion } = copilotContext;
+      const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
+      setMessages([{ role: 'assistant', text: greeting }]);
+    }
+  }, [mode, copilotContext]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -264,7 +271,15 @@ export default function CopilotScreen({
     const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
     const firstName = fullName.split(' ')[0];
 
-    const payload = mode === 'return'
+    const payload = (mode === 'return' && initialWebhook === 'daily_loop')
+      ? {
+          event: 'daily_message',
+          user_id: user?.id,
+          email: user?.email,
+          message: text,
+          timestamp: new Date().toISOString(),
+        }
+      : (mode === 'return' && initialWebhook === 'path_1')
       ? {
           event: 'daily_return',
           day_number: copilotContext?.dayNumber,
