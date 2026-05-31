@@ -289,9 +289,22 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
     tasks.forEach(t => { taskById[t.id] = t; });
 
     const completedProgress = progress.filter(p => p.status === 'complete');
+
+    // DEBUG — remove after fixing
+    console.log('[SS Debug] daily_progress rows:', progress);
+    console.log('[SS Debug] daily_tasks rows:', tasks);
+    console.log('[SS Debug] taskById keys:', Object.keys(taskById));
+    console.log('[SS Debug] completedProgress:', completedProgress);
+    console.log('[SS Debug] path filter value:', path);
+    completedProgress.forEach(p => {
+      console.log(`[SS Debug] progress day ${p.day_number} — task_id: ${p.task_id} — task found:`, taskById[p.task_id]);
+    });
+
     const dmsSent = completedProgress.filter(p => taskById[p.task_id]?.action_type === 'send_message').length;
     const pipeline = completedProgress.filter(p => taskById[p.task_id]?.milestone_type === 'pitch_sent').length;
     const proposals = completedProgress.filter(p => taskById[p.task_id]?.milestone_type === 'contract_sent').length;
+
+    console.log('[SS Debug] dmsSent:', dmsSent, '| pipeline:', pipeline, '| proposals:', proposals);
 
     const completedDays = new Set(completedProgress.map(p => p.day_number));
     const pendingTask = tasks.find(t => !completedDays.has(t.day_number) && t.day_number <= dayNumber);
