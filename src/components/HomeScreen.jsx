@@ -318,6 +318,9 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       universalTasks.find(t => t.day_number > Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
       null;
 
+    // Task is actionable only if it's for today or an overdue day
+    const taskIsToday = pendingTask ? pendingTask.day_number <= dayNumber : false;
+
     setDashData({
       totalEarned, goalAmount, progressPct,
       dayNumber, monthsActive,
@@ -326,6 +329,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       serviceCard, tasks: universalTasks, completedDays,
       toolkit, recentProgress,
       nextTask: pendingTask || universalTasks.find(t => t.day_number === Math.min(dayNumber, 9)),
+      taskIsToday,
       recipient: s.day1_recipient,
     });
 
@@ -345,7 +349,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
     dayNumber, monthsActive, day9Hit,
     dmsSent, pipeline, proposals,
     serviceCard, tasks, completedDays, nextTask, recipient,
-    toolkit, recentProgress,
+    toolkit, recentProgress, taskIsToday,
   } = dashData;
 
   const goalLabel = goalAmount > 0
@@ -403,7 +407,21 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
           </h4>
           <p>{nextTask ? `Day ${nextTask.day_number} task` : `Day ${dayNumber}`}</p>
         </div>
-        <button className="btn" onClick={onOpenCopilot}>Do it →</button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <button
+            className="btn"
+            onClick={taskIsToday ? onOpenCopilot : undefined}
+            disabled={!taskIsToday}
+            style={{ opacity: taskIsToday ? 1 : 0.45, cursor: taskIsToday ? 'pointer' : 'not-allowed' }}
+          >
+            Do it →
+          </button>
+          {!taskIsToday && (
+            <span style={{ fontSize: '10px', color: 'var(--text-mid)', fontWeight: '600', textAlign: 'right' }}>
+              Come back tomorrow
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Service Card Summary */}
