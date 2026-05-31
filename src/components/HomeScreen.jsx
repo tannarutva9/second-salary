@@ -133,7 +133,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot }) {
 
     const [progressRes, tasksRes] = await Promise.all([
       supabase.from('daily_progress')
-        .select('status, milestone_type, day_number, task:daily_tasks(action_type)')
+        .select('status, milestone_type, day_number, task_id')
         .eq('user_id', user.id),
       supabase.from('daily_tasks')
         .select('id, day_number, title, is_day9_milestone')
@@ -146,7 +146,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot }) {
     const progress = progressRes.data || [];
     const tasks = tasksRes.data || [];
 
-    const dmsSent = progress.filter(p => p.task?.action_type === 'send_message' && p.status === 'complete').length;
+    const dmsSent = progress.filter(p => p.status === 'complete').length;
     const pipeline = progress.filter(p => p.milestone_type === 'pitch_sent' && p.status === 'complete').length;
     const proposals = progress.filter(p => p.milestone_type === 'contract_sent' && p.status === 'complete').length;
     const completedDays = new Set(progress.filter(p => p.status === 'complete').map(p => p.day_number));
