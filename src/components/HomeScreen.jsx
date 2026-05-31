@@ -127,7 +127,7 @@ function CheckInItem({ dayNumber, status, returnResponse, agentNotes }) {
   );
 }
 
-function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
+function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit, onOpenCopilot }) {
   if (!tasks.length) return null;
 
   const completed = tasks.filter(t => completedDays.has(t.day_number));
@@ -156,12 +156,22 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
 
   if (day9Task) {
     cards.push(
-      <div key="day9" className="plan-card teal">
+      <div
+        key="day9"
+        className="plan-card teal"
+        onClick={!day9Hit ? onOpenCopilot : undefined}
+        style={{ cursor: day9Hit ? 'default' : 'pointer' }}
+      >
         <h4>
           Day 9 {day9Hit ? '✓' : ''}
           <span className="milestone-badge">MILESTONE</span>
         </h4>
-        <p>{day9Hit ? day9Task.title : 'Close your first project'}</p>
+        <p>{day9Hit ? 'First project closed ✓' : 'Close your first project'}</p>
+        {!day9Hit && (
+          <p style={{ fontSize: '12px', marginTop: '6px', opacity: 0.8 }}>
+            Tap to check in →
+          </p>
+        )}
       </div>
     );
   }
@@ -186,10 +196,12 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit }) {
   }
 
   cards.push(
-    <div key="extended" className="plan-card teal">
+    <div key="extended" className="plan-card teal" style={{ opacity: 0.7 }}>
       <h4>Days 10–30</h4>
-      <p>Extended Plan</p>
-      <button className="btn-outline">View Plan</button>
+      <p>Extended plan unlocks after Day 9</p>
+      <p style={{ fontSize: '11px', marginTop: '4px', opacity: 0.75 }}>
+        Complete your first project to continue
+      </p>
     </div>
   );
 
@@ -456,6 +468,7 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
         completedDays={completedDays}
         dayNumber={dayNumber}
         day9Hit={day9Hit}
+        onOpenCopilot={onOpenCopilot}
       />
 
       {/* Recent Check-ins */}
