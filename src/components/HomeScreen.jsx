@@ -306,7 +306,13 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
     const proposals = completedProgress.filter(p => taskById[p.task_id]?.milestone_type === 'contract_sent').length;
 
     const completedDays = new Set(completedProgress.map(p => p.day_number));
-    const pendingTask = tasks.find(t => !completedDays.has(t.day_number) && t.day_number <= dayNumber);
+    // First look for today's task if not complete
+    // Then fall back to the next upcoming incomplete task
+    // Never show a past day as "next action" — that's confusing
+    const pendingTask =
+      tasks.find(t => t.day_number === Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
+      tasks.find(t => t.day_number > Math.min(dayNumber, 9) && !completedDays.has(t.day_number)) ||
+      null;
 
     setDashData({
       totalEarned, goalAmount, progressPct,
