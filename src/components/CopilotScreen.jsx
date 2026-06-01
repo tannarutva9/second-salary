@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { callWebhook } from '../supabaseClient';
+import { supabase, callWebhook } from '../supabaseClient';
 
 const HANDOFF_WEBHOOK_MAP = { path_1: 'path_1' };
 
@@ -230,9 +230,9 @@ export default function CopilotScreen({
   initialWebhook = 'router',
   mode = 'onboarding',
   copilotContext = null,
-  setAgentStage, setAgentHandoff, setSessionComplete,
+  setAgentStage, setAgentHandoff,
   setPersona, setPathAssigned,
-  onSessionComplete,
+  onNavigateToDashboard,
 }) {
   const hasInitialised = useRef(false);
   const [messages, setMessages] = useState(() => {
@@ -246,7 +246,7 @@ export default function CopilotScreen({
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeWebhook, setActiveWebhook] = useState(initialWebhook);
-  const [sessionDone, setSessionDone] = useState(false);
+  const [sessionComplete, setSessionComplete] = useState(false);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -300,17 +300,55 @@ export default function CopilotScreen({
           first_name: firstName,
         };
 
-    const response = await callWebhook(payload, activeWebhook);
+    const rawResponse = await callWebhook(payload, activeWebhook);
+
+    // n8n may return a top-level array — unwrap to first item
+    const response = Array.isArray(rawResponse) ? rawResponse[0] : rawResponse;
 
     // Router format: { message, stage, handoff, session_complete }
-    // Path1 format: full session record with messages as a JSON string
+    // Path1 format: { output, session_complete } or { messages: [...] or "..." }
     let reply = response?.output || response?.message || response?.reply;
 
     if (!reply && response?.messages) {
       try {
-        const msgs = JSON.parse(response.messages);
-        const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
-        if (lastAssistant) reply = lastAssistant.content;
+        // messages may be a JSON string or already a parsed array
+        const msgs = typeof response.messages === 'string'
+          ? JSON.parse(response.messages)
+          : response.messages;
+        if (Array.isArray(msgs)) {
+          const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+          if (lastAssistant) reply = typeof lastAssistant.content === 'string'
+            ? lastAssistant.content
+            : null;
+        }
+      } catch {}
+    }
+
+    // n8n sometimes returns a raw Supabase record (sessions or users table) instead of
+    // a formatted message. Fetch the latest path_1 session to get the stored AI reply.
+    if (!reply && activeWebhook === 'path_1') {
+      try {
+        const isSessionRecord = response?.agent === 'path_1' && response?.id;
+        const query = isSessionRecord
+          ? supabase.from('sessions').select('messages, session_complete').eq('id', response.id).single()
+          : supabase.from('sessions').select('messages, session_complete').eq('user_id', user?.id).eq('agent', 'path_1').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+
+        const { data: sess } = await query;
+
+        if (sess?.messages) {
+          const msgs = typeof sess.messages === 'string'
+            ? JSON.parse(sess.messages)
+            : sess.messages;
+          if (Array.isArray(msgs)) {
+            const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+            if (lastAssistant?.content) {
+              reply = typeof lastAssistant.content === 'string'
+                ? lastAssistant.content
+                : lastAssistant.content.find?.(b => b.type === 'text')?.text ?? null;
+            }
+          }
+        }
+        if (sess?.session_complete === true) setSessionComplete(true);
       } catch {}
     }
 
@@ -318,10 +356,7 @@ export default function CopilotScreen({
 
     if (response?.stage != null) setAgentStage(response.stage);
     if (response?.handoff != null) setAgentHandoff(response.handoff);
-    if (response?.session_complete != null) {
-      setSessionComplete(response.session_complete);
-      if (response.session_complete) setSessionDone(true);
-    }
+    if (response?.session_complete === true) setSessionComplete(true);
     if (response?.persona != null) setPersona(response.persona);
     if (response?.path_assigned != null) setPathAssigned(response.path_assigned);
 
@@ -378,15 +413,35 @@ export default function CopilotScreen({
           );
         })}
 
-        {sessionDone && (
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '4px' }}>
+        {sessionComplete && activeWebhook === 'path_1' && (
+          <div style={{
+            padding: '16px 24px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            <p style={{
+              fontSize: '13px',
+              color: 'var(--text-mid)',
+              textAlign: 'center',
+              margin: 0,
+            }}>
+              Your plan is ready. Check your dashboard.
+            </p>
             <button
-              onClick={onSessionComplete}
+              onClick={onNavigateToDashboard}
               style={{
-                background: 'var(--teal)', color: 'white', border: 'none',
-                borderRadius: '14px', padding: '14px 24px', fontSize: '15px',
-                fontWeight: '700', cursor: 'pointer', boxShadow: 'var(--shadow-md)',
-                display: 'flex', alignItems: 'center', gap: '8px',
+                width: '100%',
+                maxWidth: '340px',
+                padding: '18px',
+                borderRadius: '16px',
+                background: 'var(--teal)',
+                border: 'none',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '800',
+                cursor: 'pointer',
               }}
             >
               Go to Dashboard →
@@ -417,8 +472,8 @@ export default function CopilotScreen({
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder={sessionDone ? 'Session complete' : 'Ask your co-pilot...'}
-          disabled={sessionDone}
+          placeholder={sessionComplete ? 'Session complete' : 'Ask your co-pilot...'}
+          disabled={sessionComplete}
           style={{
             flex: 1, padding: '14px 16px', borderRadius: '12px',
             border: '1.5px solid var(--border)', fontSize: '15px',
@@ -427,7 +482,7 @@ export default function CopilotScreen({
         />
         <button
           onClick={handleSend}
-          disabled={!input.trim() || loading || sessionDone}
+          disabled={!input.trim() || loading || sessionComplete}
           style={{
             width: '48px', height: '48px', borderRadius: '12px',
             background: 'var(--teal)', border: 'none', color: 'white',
