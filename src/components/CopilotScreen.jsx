@@ -235,6 +235,7 @@ export default function CopilotScreen({
   onNavigateToDashboard,
 }) {
   const hasInitialised = useRef(false);
+  const lastDayNumber = useRef(null);
   const [messages, setMessages] = useState(() => {
     if (mode === 'return' && copilotContext) {
       const { dayNumber, recipient, returnQuestion } = copilotContext;
@@ -250,16 +251,22 @@ export default function CopilotScreen({
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (mode === 'return' && copilotContext && !hasInitialised.current) {
-      hasInitialised.current = true;
-      const { dayNumber, recipient, returnQuestion } = copilotContext;
-      const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
-      setMessages([{ role: 'assistant', text: greeting }]);
+    if (mode === 'return' && copilotContext) {
+      if (!hasInitialised.current || lastDayNumber.current !== copilotContext.dayNumber) {
+        hasInitialised.current = true;
+        lastDayNumber.current = copilotContext.dayNumber;
+        const { dayNumber, recipient, returnQuestion } = copilotContext;
+        const greeting = `Day ${dayNumber}. ${(returnQuestion || '').replace('[recipient]', recipient || 'them')}`;
+        setMessages([{ role: 'assistant', text: greeting }]);
+      }
     }
   }, [mode, copilotContext]);
 
   useEffect(() => {
-    return () => { hasInitialised.current = false; };
+    return () => {
+      hasInitialised.current = false;
+      lastDayNumber.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -371,21 +378,22 @@ export default function CopilotScreen({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingBottom: 'calc(var(--nav-h) + 16px)' }}>
-      <div style={{ padding: '40px 24px 16px', background: 'var(--white)', borderBottom: '1px solid var(--border)' }}>
-        <h1 className="section-title" style={{ margin: 0, fontSize: '26px' }}>AI Co-Pilot</h1>
-        <p style={{ fontSize: '14px', color: 'var(--text-mid)', marginTop: '4px' }}>Your AI assistant for consulting revenue</p>
+      <div style={{ padding: '20px 24px 16px', background: 'var(--white)', borderBottom: '1px solid var(--border)' }}>
+        <h1 className="section-title" style={{ margin: 0, fontSize: '26px' }}>Your Coach</h1>
+        <p style={{ fontSize: '14px', color: 'var(--text-mid)', marginTop: '4px' }}>Check in daily. Build momentum.</p>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 140px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {messages.map((msg, i) => {
           if (msg.role === 'user') {
             return (
               <div key={i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <div style={{
-                  maxWidth: '80%', padding: '12px 16px',
-                  borderRadius: '18px 18px 4px 18px',
+                  maxWidth: '85%', padding: '12px 16px',
+                  borderRadius: '18px 4px 18px 18px',
                   background: 'var(--teal)', color: 'white',
-                  fontSize: '14px', lineHeight: '1.5', boxShadow: 'var(--shadow-sm)',
+                  fontSize: '14px', lineHeight: '1.6',
+                  marginBottom: '8px',
                 }}>
                   {msg.text}
                 </div>
@@ -396,13 +404,14 @@ export default function CopilotScreen({
           const { text, card } = parseAssistantMessage(msg.text);
           return (
             <div key={i} style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{ maxWidth: '92%' }}>
+              <div style={{ maxWidth: '85%' }}>
                 {text && (
                   <div style={{
                     padding: '12px 16px',
-                    borderRadius: card ? '18px 18px 4px 4px' : '18px 18px 18px 4px',
-                    background: 'var(--white)', border: '1px solid var(--border)',
-                    boxShadow: 'var(--shadow-sm)',
+                    borderRadius: '4px 18px 18px 18px',
+                    background: 'var(--cream)', border: '1px solid var(--border)',
+                    fontSize: '14px', lineHeight: '1.6', color: 'var(--text-dark)',
+                    marginBottom: '8px',
                   }}>
                     <MessageText text={text} />
                   </div>
@@ -464,8 +473,17 @@ export default function CopilotScreen({
       </div>
 
       <div style={{
-        padding: '12px 20px', background: 'var(--white)',
-        borderTop: '1px solid var(--border)', display: 'flex', gap: '12px', alignItems: 'center',
+        position: 'fixed',
+        bottom: 'var(--nav-h, 80px)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: '430px',
+        padding: '12px 16px',
+        background: 'var(--white)',
+        borderTop: '1px solid var(--border)',
+        display: 'flex', gap: '12px', alignItems: 'center',
+        zIndex: 10,
       }}>
         <input
           type="text"

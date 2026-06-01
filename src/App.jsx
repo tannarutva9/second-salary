@@ -69,7 +69,7 @@ export default function App() {
     return {
       dayNumber,
       recipient: sessionData.day1_recipient,
-      returnQuestion: taskData?.return_question || 'How did it go today?',
+      returnQuestion: taskData?.return_question || `How did Day ${dayNumber - 1} go?`,
       serviceCard,
     };
   };
@@ -328,18 +328,22 @@ export default function App() {
         <div className="bottom-nav">
           <div className={`nav-item ${activeNav === 'home' ? 'active' : ''}`} onClick={() => navigate('screen-home', 'home')}>
             <LayoutGrid size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Home</span>
           </div>
           <div className={`nav-item ${activeNav === 'copilot' ? 'active' : ''}`} onClick={navigateToCopilot}>
             <MessageSquare size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Coach</span>
           </div>
           <div className="nav-plus" onClick={() => setIsLogOpen(true)}>
             <Plus size={22} />
           </div>
           <div className={`nav-item ${activeNav === 'cohort' ? 'active' : ''}`} onClick={() => navigate('screen-cohort', 'cohort')}>
             <Users size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Stories</span>
           </div>
           <div className={`nav-item ${activeNav === 'profile' ? 'active' : ''}`} onClick={() => navigate('screen-profile', 'profile')}>
             <User size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Profile</span>
           </div>
         </div>
       )}

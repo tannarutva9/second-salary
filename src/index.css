@@ -190,7 +190,7 @@ body {
   padding: 0 8px; z-index: 100;
 }
 .nav-item {
-  color: var(--text-light); cursor: pointer; padding: 10px; display: flex; justify-content: center; align-items: center;
+  color: var(--text-light); cursor: pointer; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;
 }
 .nav-item.active { color: var(--teal); }
 .nav-plus {

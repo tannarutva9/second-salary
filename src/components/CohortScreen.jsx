@@ -39,13 +39,23 @@ export default function CohortScreen({ user }) {
   }
 
   return (
-    <div style={{ padding: '40px 24px 120px' }}>
-      <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '6px' }}>
-        Peer Stories
-      </h1>
-      <p style={{ fontSize: '14px', color: 'var(--text-mid)', marginBottom: '24px' }}>
-        People who started exactly where you are.
-      </p>
+    <>
+      <div style={{ padding: '52px 24px 0', background: 'var(--white)' }}>
+        <h1 style={{
+          fontSize: '26px', fontWeight: '800', color: 'var(--text-dark)',
+          lineHeight: '1.2', marginBottom: '4px',
+        }}>
+          Peer Stories
+        </h1>
+        <p style={{
+          fontSize: '13px', color: 'var(--text-light)',
+          marginBottom: '24px', fontWeight: '500',
+        }}>
+          People who started exactly where you are.
+        </p>
+      </div>
+
+      <div style={{ padding: '16px 24px 120px' }}>
 
       {stories.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-mid)' }}>
@@ -141,6 +151,8 @@ export default function CohortScreen({ user }) {
           </div>
         ))}
       </div>
-    </div>
+
+      </div>
+    </>
   );
 }
