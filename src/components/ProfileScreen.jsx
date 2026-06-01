@@ -79,18 +79,28 @@ export default function ProfileScreen({ theme, setTheme, showToast, user, onLogo
   };
 
   return (
-    <div style={{ padding: '48px 24px 120px' }}>
+    <div style={{ paddingBottom: '120px' }}>
       {/* Profile Hero */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--teal), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: '800', color: 'white', flexShrink: 0 }}>
+      <div style={{ padding: '52px 24px 24px', background: 'var(--white)' }}>
+        <div style={{
+          width: '64px', height: '64px', borderRadius: '50%',
+          background: 'var(--teal)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'white', fontWeight: '800', fontSize: '24px',
+          marginBottom: '12px',
+          boxShadow: '0 4px 12px rgba(27,77,87,0.3)',
+        }}>
           {(name || user?.email || 'U')[0].toUpperCase()}
         </div>
-        <div>
-          <div style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-dark)' }}>{name || 'Your Name'}</div>
-          <div style={{ fontSize: '13px', color: 'var(--text-mid)', marginTop: '2px' }}>{user?.email}</div>
-        </div>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '2px' }}>
+          {name || 'Your Name'}
+        </h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-light)', fontWeight: '500' }}>
+          {user?.email}
+        </p>
       </div>
 
+      <div style={{ padding: '0 24px' }}>
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '4px' }}>
         <button style={tabStyle('profile')} onClick={() => setActiveTab('profile')}>Profile</button>
@@ -185,6 +195,7 @@ export default function ProfileScreen({ theme, setTheme, showToast, user, onLogo
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { LayoutGrid, MessageSquare, Plus, Users, User } from 'lucide-react';
 import './index.css';
 
@@ -20,17 +20,12 @@ export default function App() {
   const [logAmount, setLogAmount] = useState('');
   const [agentStage, setAgentStage] = useState(null);
   const [agentHandoff, setAgentHandoff] = useState(null);
-  const [sessionComplete, setSessionComplete] = useState(false);
   const [persona, setPersona] = useState(null);
   const [pathAssigned, setPathAssigned] = useState(null);
   const [initialWebhook, setInitialWebhook] = useState('router');
   const [copilotMode, setCopilotMode] = useState('onboarding');
   const [copilotContext, setCopilotContext] = useState(null);
-
-  const goToDashboard = () => {
-    setActiveScreen('screen-home');
-    setActiveNav('home');
-  };
+  const hasNavigated = useRef(false);
 
   const buildDailyLoopContext = async (userId) => {
     const { data: sessionData, error: sessionError } = await supabase
@@ -74,7 +69,7 @@ export default function App() {
     return {
       dayNumber,
       recipient: sessionData.day1_recipient,
-      returnQuestion: taskData?.return_question || 'How did it go today?',
+      returnQuestion: taskData?.return_question || `How did Day ${dayNumber - 1} go?`,
       serviceCard,
     };
   };
@@ -111,6 +106,12 @@ export default function App() {
   // Listen for Supabase auth state changes
   useEffect(() => {
     const navigateAfterLogin = async (user) => {
+      // Guard: only run once per login session. Supabase fires SIGNED_IN on
+      // token auto-refresh too, which would re-run this mid-conversation and
+      // navigate away based on the (now-updated) active_webhook.
+      if (hasNavigated.current) return;
+      hasNavigated.current = true;
+
       const { data } = await supabase
         .from('users')
         .select('active_webhook')
@@ -170,6 +171,7 @@ export default function App() {
         setUser(session.user);
         navigateAfterLogin(session.user);
       } else if (_event === 'SIGNED_OUT') {
+        hasNavigated.current = false;
         setUser(null);
         setActiveScreen('screen-login');
       } else if (session?.user) {
@@ -249,11 +251,13 @@ export default function App() {
             setAgentStage={setAgentStage}
             agentHandoff={agentHandoff}
             setAgentHandoff={setAgentHandoff}
-            sessionComplete={sessionComplete}
-            setSessionComplete={setSessionComplete}
             setPersona={setPersona}
             setPathAssigned={setPathAssigned}
-            onSessionComplete={goToDashboard}
+            onNavigateToDashboard={async () => {
+              await navigateToCopilot();
+              setActiveScreen('screen-home');
+              setActiveNav('home');
+            }}
           />
         )}
         {activeScreen === 'screen-cohort' && <CohortScreen user={user} />}
@@ -324,18 +328,22 @@ export default function App() {
         <div className="bottom-nav">
           <div className={`nav-item ${activeNav === 'home' ? 'active' : ''}`} onClick={() => navigate('screen-home', 'home')}>
             <LayoutGrid size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Home</span>
           </div>
           <div className={`nav-item ${activeNav === 'copilot' ? 'active' : ''}`} onClick={navigateToCopilot}>
             <MessageSquare size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Coach</span>
           </div>
           <div className="nav-plus" onClick={() => setIsLogOpen(true)}>
             <Plus size={22} />
           </div>
           <div className={`nav-item ${activeNav === 'cohort' ? 'active' : ''}`} onClick={() => navigate('screen-cohort', 'cohort')}>
             <Users size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Stories</span>
           </div>
           <div className={`nav-item ${activeNav === 'profile' ? 'active' : ''}`} onClick={() => navigate('screen-profile', 'profile')}>
             <User size={22} />
+            <span style={{ fontSize: '10px', fontWeight: '600', marginTop: '3px' }}>Profile</span>
           </div>
         </div>
       )}

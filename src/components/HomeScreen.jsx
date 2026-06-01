@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Zap, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Zap, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const CIRCUMFERENCE = 251.2; // 2π × r40
@@ -291,7 +291,7 @@ function DayPlanGrid({ tasks, completedDays, dayNumber, day9Hit, onOpenCopilot }
   );
 
   return (
-    <div className="plan-grid">
+    <div className="plan-grid" style={{ padding: '0 0 20px' }}>
       {cards.slice(0, 4)}
     </div>
   );
@@ -484,136 +484,186 @@ export default function HomeScreen({ onOpenLog, user, onOpenCopilot, refreshKey 
       </div>
 
       {/* Stat pills */}
-      <div className="stat-row">
+      <div className="stat-row" style={{ marginTop: '20px' }}>
         <StatPill value={`Day ${dayNumber}`} label="Day" color="orange" />
         <StatPill value={day9Hit ? 'Day 9 ✓' : 'Day 9'} label="Plan" color={day9Hit ? 'teal' : 'orange'} />
         <StatPill value={monthsActive} label="Months" color="green" />
         <StatPill value={goalLabel} label="Goal" color="orange" />
       </div>
 
-      {/* Next Action */}
-      <h2 className="section-title">Next Action</h2>
-      <div className="next-action">
-        <div className="icon"><Send size={20} /></div>
-        <div className="body">
-          <h4>
-            {nextTask
-              ? (nextTask.day_number === 1 && recipient
-                  ? `Send pitch to ${recipient}${serviceCard?.service_name ? ` — ${serviceCard.service_name}` : ''}`
-                  : `${nextTask.title}${recipient ? ` — ${recipient}` : ''}`)
-              : "Today's daily check-in"}
-          </h4>
-          <p>{nextTask ? `Day ${nextTask.day_number} task` : `Day ${dayNumber}`}</p>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-          <button
-            className="btn"
-            onClick={taskIsToday ? onOpenCopilot : undefined}
-            disabled={!taskIsToday}
-            style={{ opacity: taskIsToday ? 1 : 0.45, cursor: taskIsToday ? 'pointer' : 'not-allowed' }}
-          >
-            Do it →
-          </button>
-          {!taskIsToday && (
-            <span style={{ fontSize: '10px', color: 'var(--text-mid)', fontWeight: '600', textAlign: 'right' }}>
-              Come back tomorrow
-            </span>
-          )}
-        </div>
-      </div>
+      {/* Main content wrapper */}
+      <div style={{ padding: '0 20px' }}>
 
-      {/* Service Card Summary */}
-      {serviceCard && (
-        <div className="confidence-card">
-          <div className="header">
-            <h4>Your Service</h4>
-            <span className="val">₹{serviceCard.price?.toLocaleString('en-IN')}</span>
-          </div>
-          <div style={{ fontSize: '13px', color: 'var(--text-dark)', fontWeight: '600', marginTop: '6px' }}>
-            {serviceCard.service_name}
-          </div>
-          {serviceCard.delivery_days && (
-            <div style={{ fontSize: '12px', color: 'var(--text-light)', marginTop: '4px' }}>
-              {serviceCard.delivery_days}-day delivery · {serviceCard.ideal_client}
+        {/* Next Action */}
+        {nextTask && (
+          <div className="confidence-card" style={{ marginBottom: '24px', marginLeft: 0, marginRight: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%',
+                background: 'var(--cream)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <span style={{ fontSize: '18px' }}>
+                  {taskIsToday ? '⚡' : '📅'}
+                </span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontSize: '11px', fontWeight: '700',
+                  color: 'var(--text-mid)', textTransform: 'uppercase',
+                  letterSpacing: '0.5px', marginBottom: '3px',
+                }}>
+                  {taskIsToday ? 'Next Action' : `Day ${nextTask.day_number} — Tomorrow`}
+                </div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-dark)' }}>
+                  {nextTask.day_number === 1
+                    ? nextTask.title + (recipient ? ` — ${recipient}` : '')
+                    : nextTask.title}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-mid)', marginTop: '2px' }}>
+                  {taskIsToday ? `Day ${nextTask.day_number} task` : `Tomorrow's task`}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <button
+                  className="btn"
+                  onClick={taskIsToday ? onOpenCopilot : undefined}
+                  disabled={!taskIsToday}
+                  style={{
+                    opacity: taskIsToday ? 1 : 0.45,
+                    cursor: taskIsToday ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  {taskIsToday ? 'Do it →' : '✓ Done'}
+                </button>
+                {!taskIsToday && (
+                  <span style={{
+                    fontSize: '10px', color: 'var(--text-mid)',
+                    fontWeight: '600', textAlign: 'right',
+                  }}>
+                    Come back tomorrow
+                  </span>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Your Tools — pitch email + protection toolkit */}
-      {(serviceCard?.pitch_email || toolkit.length > 0) && (
-        <>
-          <h2 className="section-title">Your Tools</h2>
-          <div className="confidence-card">
-            {serviceCard?.pitch_email && (
-              <ToolItem
-                title="Your Pitch Email"
-                subtitle={`To: ${recipient || 'your contact'}`}
-                content={serviceCard.pitch_email.body || serviceCard.pitch_email}
-              />
+        {/* Service Card Summary */}
+        {serviceCard && (
+          <div className="confidence-card" style={{ marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0 }}>
+            <div className="header">
+              <h4>Your Service</h4>
+              <span className="val">₹{serviceCard.price?.toLocaleString('en-IN')}</span>
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--text-dark)', fontWeight: '600', marginTop: '6px' }}>
+              {serviceCard.service_name}
+            </div>
+            {serviceCard.delivery_days && (
+              <div style={{ fontSize: '12px', color: 'var(--text-light)', marginTop: '4px' }}>
+                {serviceCard.delivery_days}-day delivery · {serviceCard.ideal_client}
+              </div>
             )}
-            {toolkit.map((tool, i) => (
-              <ToolItem
-                key={i}
-                title={tool.title}
-                subtitle={
-                  tool.tool_type === 'contract_template' ? 'Contract Template' :
-                  tool.tool_type === 'scope_creep_script' ? 'Scope Creep Script' :
-                  tool.tool_type === 'ghosting_playbook' ? 'Ghosting Playbook' :
-                  tool.tool_type
-                }
-                content={tool.content}
-              />
-            ))}
           </div>
-        </>
-      )}
+        )}
 
-      {/* Quick Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', margin: '20px 0' }}>
-        {[
-          { icon: <Zap size={20} style={{ color: 'var(--orange)' }} />, value: dmsSent, label: 'DMs Sent' },
-          { icon: <Users size={20} style={{ color: 'var(--teal)' }} />, value: pipeline, label: 'Pipeline' },
-          { icon: <TrendingUp size={20} style={{ color: '#22C55E' }} />, value: proposals, label: 'Proposals' },
-        ].map(({ icon, value, label }) => (
-          <div key={label} style={{
-            background: 'var(--white)', borderRadius: '16px', padding: '16px 12px',
-            textAlign: 'center', boxShadow: 'var(--shadow-sm)',
-          }}>
-            <div style={{ marginBottom: '8px' }}>{icon}</div>
-            <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)' }}>{value}</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-mid)' }}>{label}</div>
-          </div>
-        ))}
+        {/* Your Tools — pitch email + protection toolkit */}
+        {(serviceCard?.pitch_email || toolkit.length > 0) && (
+          <>
+            <h2 style={{
+              fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)',
+              padding: '24px 0 12px', margin: 0,
+            }}>
+              Your Tools
+            </h2>
+            <div className="confidence-card" style={{ marginLeft: 0, marginRight: 0 }}>
+              {serviceCard?.pitch_email && (
+                <ToolItem
+                  title="Your Pitch Email"
+                  subtitle={`To: ${recipient || 'your contact'}`}
+                  content={serviceCard.pitch_email.body || serviceCard.pitch_email}
+                />
+              )}
+              {toolkit.map((tool, i) => (
+                <ToolItem
+                  key={i}
+                  title={tool.title}
+                  subtitle={
+                    tool.tool_type === 'contract_template' ? 'Contract Template' :
+                    tool.tool_type === 'scope_creep_script' ? 'Scope Creep Script' :
+                    tool.tool_type === 'ghosting_playbook' ? 'Ghosting Playbook' :
+                    tool.tool_type
+                  }
+                  content={tool.content}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Progress */}
+        <h2 style={{
+          fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)',
+          padding: '24px 0 12px', margin: 0,
+        }}>
+          Progress
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+          {[
+            { icon: <Zap size={20} style={{ color: 'var(--orange)' }} />, value: dmsSent, label: 'DMs Sent' },
+            { icon: <Users size={20} style={{ color: 'var(--teal)' }} />, value: pipeline, label: 'Pipeline' },
+            { icon: <TrendingUp size={20} style={{ color: '#22C55E' }} />, value: proposals, label: 'Proposals' },
+          ].map(({ icon, value, label }) => (
+            <div key={label} style={{
+              background: 'var(--white)', borderRadius: '16px', padding: '16px 12px',
+              textAlign: 'center', boxShadow: 'var(--shadow-sm)',
+            }}>
+              <div style={{ marginBottom: '8px' }}>{icon}</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)' }}>{value}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-mid)' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Day Plan Grid */}
+        <h2 style={{
+          fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)',
+          padding: '24px 0 12px', margin: 0,
+        }}>
+          Your Day-9 Plan
+        </h2>
+        <DayPlanGrid
+          tasks={tasks}
+          completedDays={completedDays}
+          dayNumber={dayNumber}
+          day9Hit={day9Hit}
+          onOpenCopilot={onOpenCopilot}
+        />
+
+        {/* Recent Check-ins */}
+        {recentProgress.length > 0 && (
+          <>
+            <h2 style={{
+              fontSize: '18px', fontWeight: '800', color: 'var(--text-dark)',
+              padding: '24px 0 12px', margin: 0,
+            }}>
+              Recent Check-ins
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px', overflow: 'visible' }}>
+              {recentProgress.map((p, i) => (
+                <CheckInItem
+                  key={i}
+                  dayNumber={p.day_number}
+                  status={p.status}
+                  returnResponse={p.return_response}
+                  agentNotes={p.agent_notes}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
-
-      {/* Day Plan Grid */}
-      <h2 className="section-title">Your Day-9 Plan</h2>
-      <DayPlanGrid
-        tasks={tasks}
-        completedDays={completedDays}
-        dayNumber={dayNumber}
-        day9Hit={day9Hit}
-        onOpenCopilot={onOpenCopilot}
-      />
-
-      {/* Recent Check-ins */}
-      {recentProgress.length > 0 && (
-        <>
-          <h2 className="section-title">Recent Check-ins</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
-            {recentProgress.map((p, i) => (
-              <CheckInItem
-                key={i}
-                dayNumber={p.day_number}
-                status={p.status}
-                returnResponse={p.return_response}
-                agentNotes={p.agent_notes}
-              />
-            ))}
-          </div>
-        </>
-      )}
     </>
   );
 }
